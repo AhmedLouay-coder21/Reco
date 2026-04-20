@@ -1,6 +1,6 @@
 # RECO: Intelligent E-Commerce Platform with Hybrid Recommendation Engine
 
-## 👥 Group Members
+## Group Members
 - Abdelrahman Hany Farouk (SE1)  
 - Ahmad Louay Mahmoud (SE1)  
 - Youssef Waleed (SE1)  
@@ -73,7 +73,7 @@ A multi-layer recommendation system including:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 - Java
@@ -113,7 +113,7 @@ Used to dynamically select recommendation strategies:
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 The system follows a **Layered Architecture (Controller → Service → Repository)**:
 
@@ -144,7 +144,7 @@ The system follows a **Layered Architecture (Controller → Service → Reposito
 
 ---
 
-## 🔗 System Design Summary
+## System Design Summary
 
 RECO is a **decoupled full-stack system**:
 
