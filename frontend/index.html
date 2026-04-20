@@ -1,13 +1,23 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>THE FIELD — Otherworldly Objects</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Josefin+Sans:wght@100;300;400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-void text-white font-josefin overflow-x-hidden">
+
+  <!--This is the entire pages body, this should always be empty-->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+  <div class="stars fixed inset-0 pointer-events-none z-0" id="stars"></div>
+
+  <div id="nav-slot"></div>
+  <main id="app"></main>
+  <div id="footer-slot"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
 </html>
