@@ -2,8 +2,6 @@
 
 ## Requirements & Initial Design Document
 
-
-
 ---
 
 ## Description
@@ -75,7 +73,16 @@ RECO solves these challenges by providing:
 - FR-6.2: System shall provide **Content-Based Filtering** recommendations based on category/tags similarity
 - FR-6.3: System shall provide **Collaborative Filtering** recommendations based on "users also bought" patterns
 - FR-6.4: Recommendations shall be displayed on product detail pages and user dashboard
-- FR-6.5: System shall analyze user behavior "purchases" to improve recommendations over time
+- FR-6.5: System shall analyze user behavior "purchases and reviews" to improve recommendations over time
+- FR-6.6: System shall use products rated 4+ stars from reviews to find similar products via product similarity scores
+
+### FR-7: Product Reviews & Ratings
+- FR-7.1: Customers shall be able to create reviews with a rating (1-5) and optional comment for purchased products
+- FR-7.2: System shall automatically update the product's average rating when a review is created, updated, or deleted
+- FR-7.3: Customers shall be able to view all reviews for a product with pagination and sorting (by rating or date)
+- FR-7.4: System shall display a rating distribution breakdown (5-star to 1-star counts) for each product
+- FR-7.5: Customers shall be able to update or delete their own reviews
+- FR-7.6: System shall allow customers to view all reviews they have written across products
 
 ---
 
@@ -137,6 +144,17 @@ RECO solves these challenges by providing:
 2. Admin can filter by status, date, or customer
 3. System notifies customer of status changes
 
+### UC-7: Write & Manage Product Reviews
+**Actor**: Customer  
+**Description**: As a customer, I want to leave reviews and ratings for products I purchased so that I can share my experience and help other shoppers.  
+**Flow**:
+1. User navigates to a product detail page
+2. User clicks "Write Review" and selects a rating (1-5) with an optional comment
+3. System validates input and creates the review record
+4. System recalculates the product's average rating and rating distribution
+5. User can later edit or delete their own review
+6. Other customers can view all reviews sorted by rating or date
+
 ---
 
 ## Non-Functional Requirements
@@ -192,7 +210,7 @@ RECO solves these challenges by providing:
 
 ---
 
-## 7. High-Level Architecture
+## High-Level Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -240,10 +258,15 @@ RECO solves these challenges by providing:
 │  │  Table   │ │  Table   │ │  Table   │ │    Table      │  │
 │  └──────────┘ └──────────┘ └──────────┘ └───────────────┘  │
 │                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐                   │
-│  │  Carts   │ │ Payments │ │Categories│                   │
-│  │  Table   │ │  Table   │ │  Table   │                   │
-│  └──────────┘ └──────────┘ └──────────┘                   │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐  │
+│  │  Users   │ │ Products │ │  Orders  │ │ Recommendations│  │
+│  │  Table   │ │  Table   │ │  Table   │ │    Table      │  │
+│  └──────────┘ └──────────┘ └──────────┘ └───────────────┘  │
+│                                                             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐  │
+│  │  Carts   │ │ Payments │ │Categories│ │    Reviews     │  │
+│  │  Table   │ │  Table   │ │  Table   │ │    Table      │  │
+│  └──────────┘ └──────────┘ └──────────┘ └───────────────┘  │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -259,7 +282,7 @@ RECO solves these challenges by providing:
 
 ---
 
-## 8. Selected Design Patterns
+## Selected Design Patterns
 
 ### DP-1: Factory Pattern
 **Purpose**: Dynamically select recommendation strategies based on user context  
@@ -318,7 +341,7 @@ public class Order {
 
 ---
 
-## 9. Initial Class List
+## Initial Class List
 
 ### Core Domain Classes
 
@@ -332,6 +355,7 @@ public class Order {
 | **Order** | Customer purchase record | `id`, `userId`, `items`, `totalAmount`, `status`, `createdAt`, `paymentId` | `create()`, `updateStatus()`, `getDetails()` |
 | **OrderItem** | Individual order line item | `id`, `orderId`, `productId`, `quantity`, `price` | `calculateSubtotal()` |
 | **Payment** | Payment transaction record | `id`, `orderId`, `amount`, `status`, `transactionId`, `timestamp` | `processPayment()` |
+| **Review** | Product review and rating | `id`, `userId`, `productId`, `rating`, `comment`, `createdAt`, `updatedAt` | `create()`, `update()`, `delete()`, `calculateAverageRating()` |
 | **Recommendation** | Product recommendation data | `id`, `userId`, `recommendedProducts`, `strategy`, `generatedAt` | `generate()`, `getRecommendations()` |
 
 ### Service Layer Classes
@@ -343,6 +367,7 @@ public class Order {
 | **CartService** | Shopping cart operations | `addToCart()`, `removeFromCart()`, `updateQuantity()`, `getCart()`, `calculateTotal()` |
 | **OrderService** | Order processing and management | `createOrder()`, `getOrdersByUser()`, `updateOrderStatus()`, `getAllOrders()` |
 | **PaymentService** | Mock payment processing | `processPayment()`, `refundPayment()`, `getPaymentDetails()` |
+| **ReviewService** | Review and rating management | `createReview()`, `updateReview()`, `deleteReview()`, `getProductReviews()`, `getUserReviews()`, `calculateAverageRating()` |
 | **RecommendationService** | Hybrid recommendation engine | `getRecommendations()`, `selectStrategy()`, `analyzeUserBehavior()` |
 
 ### Recommendation Strategy Classes
@@ -364,6 +389,7 @@ public class Order {
 | **CartController** | Cart management endpoints | `GET /api/cart`, `POST /api/cart/items`, `PUT /api/cart/items/{id}`, `DELETE /api/cart/items/{id}` |
 | **OrderController** | Order processing endpoints | `POST /api/orders`, `GET /api/orders`, `GET /api/orders/{id}` |
 | **PaymentController** | Payment endpoints | `POST /api/payments`, `GET /api/payments/{id}` |
+| **ReviewController** | Review endpoints | `POST /api/products/{id}/reviews`, `GET /api/products/{id}/reviews`, `GET /api/users/{id}/reviews`, `PUT /api/reviews/{id}`, `DELETE /api/reviews/{id}` |
 | **RecommendationController** | Recommendation endpoints | `GET /api/recommendations`, `GET /api/recommendations/product/{id}` |
 
 ### Configuration & Utility Classes
@@ -388,6 +414,8 @@ public class Order {
 - **Order** (1) → (1) **Payment**
 - **Category** (1) → (N) **Product**
 - **User** (1) → (N) **Recommendation**
+- **User** (1) → (N) **Review**
+- **Product** (1) → (N) **Review**
 
 ---
 
@@ -413,6 +441,12 @@ public class Order {
 | Payments | `/api/payments/{id}` | GET | Get payment details |
 | Recommendations | `/api/recommendations` | GET | Get user recommendations |
 | Recommendations | `/api/recommendations/product/{id}` | GET | Get product-based recommendations |
+| Reviews | `/api/products/{id}/reviews` | POST | Create review for product |
+| Reviews | `/api/products/{id}/reviews` | GET | Get all reviews for product |
+| Reviews | `/api/users/{id}/reviews` | GET | Get all reviews by user |
+| Reviews | `/api/reviews/{id}` | PUT | Update own review |
+| Reviews | `/api/reviews/{id}` | DELETE | Delete own review |
+| Reviews | `/api/products/{id}/rating` | GET | Get product rating summary |
 
 ---
 

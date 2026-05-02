@@ -366,22 +366,22 @@ GET /api/v1/products/{product_id}/frequently-bought-together
 ## WEBPAGE SCREENSHOTS
 
 ### Preview 1
-![Webpage Screenshot 1](./1.jpeg)
+![Webpage Screenshot 1](./Screenshots/1.jpeg)
 
 ### Preview 2
-![Webpage Screenshot 2](./2.jpeg)
+![Webpage Screenshot 2](./Screenshots/2.jpeg)
 
 ### Preview 3
-![Webpage Screenshot 3](./3.jpeg)
+![Webpage Screenshot 3](./Screenshots/3.jpeg)
 
 ### Preview 4
-![Webpage Screenshot 4](./4.jpeg)
+![Webpage Screenshot 4](./Screenshots/4.jpeg)
 
 ### Preview 5
-![Webpage Screenshot 5](./5.jpeg)
+![Webpage Screenshot 5](./Screenshots/5.jpeg)
 
 ### Preview 6
-![Webpage Screenshot 6](./6.jpeg)
+![Webpage Screenshot 6](./Screenshots/6.jpeg)
 
 ---
 
