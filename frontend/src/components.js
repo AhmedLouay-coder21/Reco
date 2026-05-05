@@ -132,7 +132,9 @@ export function TestimonialFeatured({ quote, initials, name, role }) {
 
 export function TestimonialCard({ quote, initials, name, role }) {
   return `
-    <div class="testi-card p-10 bg-deep hover:bg-purple/5 transition-all relative group overflow-hidden">
+    <div class="testi-card p-10 bg-deep hover:bg-purple/5 transition-all relative group overflow-hidden" style="
+    background-color: var(--color-main);
+">
       <div class="flex gap-1 mb-4">${Stars('[0.75rem]')}</div>
       <p class="text-[0.82rem] font-light italic leading-relaxed text-muted mb-6">${quote}</p>
       <div class="flex items-center gap-3">

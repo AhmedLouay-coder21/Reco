@@ -1,39 +1,83 @@
 @import "tailwindcss";
 
 @theme {
-  --color-void: #04010a;
-  --color-deep: #07020f;
-  --color-surface: #0d0520;
-  --color-surface2: #120730;
-  
-  --color-purple: #9b59f7;
-  --color-purple-bright: #bf8fff;
-  --color-purple-dim: #5a2fa0;
-  --color-purple-glow: rgba(155, 89, 247, 0.35);
-  --color-purple-glow2: rgba(155, 89, 247, 0.12);
+  --color-main: #111b3c;
+  --color-deep: #e5e5e5;
+  --color-surface: #ffffff;
+  --color-surface2: #f9f9f9;
+  --color-products-section: #fcf8f3;
+  --color-stars: #f96d00;
+
+  --color-purple: #f96d00;
+  --color-purple-bright: #f96d00;
+  --color-purple-dim: #f96d00;
+  --color-glow: rgba(155, 89, 247, 0.2);
+  --color-glow2: rgba(155, 89, 247, 0.05);
   
   --color-violet: #7c3aed;
-  --color-lavender: #d4b8ff;
-  --color-white: #f0e8ff;
-  --color-muted: #7a6b99;
-  --color-border: rgba(155, 89, 247, 0.2);
+  --color-lavender: #a78bfa;
+  --color-white: #1a1a1a;
+  /* text color */
+  --color-muted: white;
+  --color-border: rgba(0, 0, 0, 0.1);
 
   --font-bebas: "Bebas Neue", sans-serif;
   --font-josefin: "Josefin Sans", sans-serif;
   --font-space: "Space Mono", monospace;
 }
+@media (prefers-color-scheme: dark)
+{
+    :root {
+    --color-main: #04010a;
+    --color-deep: #07020f;
+    --color-surface: #0d0520;
+    --color-surface2: #120730;
+    --color-products-section: #04010a;
+    --color-stars: white;
+    
+    --color-purple: #9b59f7;
+    --color-purple-bright: #bf8fff;
+    --color-purple-dim: #5a2fa0;
+    --color-glow: rgba(155, 89, 247, 0.35);
+    --color-glow2: rgba(155, 89, 247, 0.12);
+    
+    --color-violet: #7c3aed;
+    --color-lavender: #d4b8ff;
+    --color-white: #f0e8ff;
+    --color-muted: #7a6b99;
+    --color-border: rgba(155, 89, 247, 0.2);
 
-/* Base Adjustments */
-body {
-    cursor: none; 
-    background-color: var(--color-void);
+    --font-bebas: "Bebas Neue", sans-serif;
+    --font-josefin: "Josefin Sans", sans-serif;
+    --font-space: "Space Mono", monospace;
+    }
 }
-
+@layer base {
+  body {
+    cursor: none; 
+    background-color: var(--color-main);
+    color: var(--color-white);
+    transition: background-color 0.3s ease;
+  }
+}
+hr
+{
+    color: var(--color-purple);
+    border: 5px solid;
+}
+#products
+{
+    background-color: var(--color-products-section);
+}
+#categories
+{
+    color: var(--color-main);
+}
 /* CURSOR */
 .cursor {
     position: fixed; width: 12px; height: 12px; border-radius: 50%;
     background: var(--color-purple);
-    box-shadow: 0 0 16px 4px var(--color-purple-glow), 0 0 40px 8px rgba(155,89,247,0.15);
+    box-shadow: 0 0 16px 4px var(--color-glow), 0 0 40px 8px rgba(155,89,247,0.15);
     pointer-events: none; z-index: 9999;
     transition: transform 0.1s; transform: translate(-50%, -50%);
 }
@@ -53,7 +97,7 @@ body {
 }
 
 .star { 
-    position: absolute; border-radius: 50%; background: #fff; 
+    position: absolute; border-radius: 50%; background: var(--color-stars); 
     animation: twinkle var(--d) infinite alternate; opacity: var(--op); z-index: 0; 
 }
 
@@ -64,8 +108,8 @@ body {
 
 /* GLOW ANIMATIONS */
 @keyframes pulseGlow {
-    0%, 100% { text-shadow: 0 0 20px rgba(155,89,247,0.35), 0 0 60px rgba(155,89,247,0.4), 0 0 120px rgba(155,89,247,0.2); }
-    50% { text-shadow: 0 0 40px rgba(155,89,247,0.8), 0 0 100px rgba(155,89,247,0.6), 0 0 200px rgba(155,89,247,0.3); }
+    0%, 100% { text-shadow: 0 0 20px rgba(255, 115, 0, 0.35), 0 0 60px rgba(255, 115, 0, 0.4), 0 0 120px rgba(255, 115, 0, 0.2); }
+    50% { text-shadow: 0 0 40px rgba(255, 115, 0, 0.8), 0 0 100px rgba(255, 115, 0, 0.6), 0 0 200px rgba(255, 115, 0,0.3); }
 }
 
 /* PRODUCT SHAPES */
@@ -102,6 +146,7 @@ body {
                 transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .reveal.vis {
+    color: var(--color-purple);
     opacity: 1;
     transform: none;
 }
