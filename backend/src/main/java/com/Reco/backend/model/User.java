@@ -1,9 +1,7 @@
 package com.Reco.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
@@ -14,6 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class User {
 
     @Id

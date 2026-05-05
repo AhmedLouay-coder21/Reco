@@ -1,9 +1,7 @@
 package com.Reco.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -14,6 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "orders")
+@Getter
+@Setter
 public class Order {
 
     @Id
@@ -31,7 +31,7 @@ public class Order {
     @Column(name = "created_at",nullable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
 }

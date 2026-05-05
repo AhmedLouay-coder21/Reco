@@ -3,9 +3,7 @@ package com.Reco.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -15,6 +13,8 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "black_listed_tokens")
+@Getter
+@Setter
 public class BlackListedToken {
 
     @Id

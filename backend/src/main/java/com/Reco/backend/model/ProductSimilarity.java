@@ -1,10 +1,7 @@
 package com.Reco.backend.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -15,6 +12,8 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "product_similarities")
+@Getter
+@Setter
 public class ProductSimilarity {
 
     @Id

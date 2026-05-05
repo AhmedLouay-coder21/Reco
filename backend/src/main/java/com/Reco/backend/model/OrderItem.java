@@ -1,9 +1,7 @@
 package com.Reco.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -12,6 +10,8 @@ import java.math.BigDecimal;
 @Builder
 @Entity
 @Table(name = "order_items")
+@Getter
+@Setter
 public class OrderItem {
 
     @Id

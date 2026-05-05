@@ -3,9 +3,7 @@ package com.Reco.backend.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,6 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "reviews")
+@Getter
+@Setter
 public class Review {
 
     @Id

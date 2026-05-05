@@ -1,9 +1,7 @@
 package com.Reco.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "carts")
+@Getter
+@Setter
 public class Cart {
 
     @Id

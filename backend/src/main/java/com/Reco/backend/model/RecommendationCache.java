@@ -2,9 +2,7 @@ package com.Reco.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -15,6 +13,8 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "recommendation_caches")
+@Getter
+@Setter
 public class RecommendationCache {
 
     @Id
@@ -28,7 +28,7 @@ public class RecommendationCache {
     @Column(nullable = false)
     private Instant generatedAt;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     @Column(nullable = false)
     private Instant expiresAt;
 

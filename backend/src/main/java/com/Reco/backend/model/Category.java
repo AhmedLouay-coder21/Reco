@@ -1,15 +1,15 @@
 package com.Reco.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
 @Table(name = "categories")
+@Getter
+@Setter
 public class Category {
 
     @Id

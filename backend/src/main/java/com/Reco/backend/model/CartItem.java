@@ -2,15 +2,15 @@ package com.Reco.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
 @Table(name = "cart_items")
+@Getter
+@Setter
 public class CartItem {
 
     @Id
