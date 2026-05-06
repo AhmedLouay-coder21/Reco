@@ -23,7 +23,6 @@ public class ProductRepositoryTest {
     @Test
     void testThatVerifyProductBuildAllFields(){
 
-
         Category category = Category.builder()
                 .name("Tech")
                 .description("Tech things")
