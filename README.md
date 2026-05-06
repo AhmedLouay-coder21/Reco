@@ -95,6 +95,28 @@ A multi-layer recommendation system including:
 
 ---
 
+## How to run
+Installation & Setup (Frontend)
+Prerequisites
+Node.js (v18.0 or higher)
+
+npm (Node Package Manager)
+
+Steps to Run
+Navigate to the project folder:
+
+Bash
+cd path/to/your/frontend-folder
+Install dependencies:
+This installs Vite, Tailwind CSS, and the necessary build tools.
+
+Bash
+npm install
+Start the development server:
+
+Bash
+npm run dev
+
 ## Design Patterns Used
 
 ### Builder Pattern

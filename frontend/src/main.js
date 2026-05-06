@@ -50,7 +50,7 @@ document.getElementById('app').innerHTML = `
   <div class="reveal max-w-[90%] mx-auto mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-border relative z-10">
     ${FEATURES.map((f, i) => FeatureCard(f, i === FEATURES.length - 1)).join('')}
   </div>
-
+  <hr>
   <!-- PRODUCTS -->
   <section id="products" class="px-6 lg:px-20 py-28 relative z-10">
     <div class="reveal flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
@@ -62,7 +62,7 @@ document.getElementById('app').innerHTML = `
           OBJECTS <span class="text-purple-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">FROM</span><br>THE FIELD
         </h2>
       </div>
-      <div class="flex gap-2">
+      <div id = "categories" class="flex gap-2">
         <button class="ftab px-4 py-1.5 border border-purple text-[0.7rem] uppercase tracking-widest text-purple-bright bg-purple/10" data-filter="all">All</button>
         <button class="ftab px-4 py-1.5 border border-border text-[0.7rem] uppercase tracking-widest text-muted" data-filter="ritual">Ritual</button>
         <button class="ftab px-4 py-1.5 border border-border text-[0.7rem] uppercase tracking-widest text-muted" data-filter="form">Form</button>
