@@ -20,7 +20,7 @@ document.getElementById('app').innerHTML = `
 
   <!-- HERO -->
   <section class="hero min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10 pt-20">
-    <p class="font-space text-[0.7rem] tracking-[0.3em] uppercase text-purple mb-8 hero-anim-1">
+    <p class="font-space text-[0.7rem] tracking-[0.3em] uppercase text-secondary mb-8 hero-anim-1">
       — Frequency 001 · Drop Season IV —
     </p>
     <h1 class="hero-title font-bebas text-[clamp(4rem,14vw,12rem)] mb-4 hero-anim-2">
@@ -30,15 +30,15 @@ document.getElementById('app').innerHTML = `
       Objects channeled from the space between thought and form.<br>For those who feel the frequency.
     </p>
     <div class="flex gap-5 hero-anim-4">
-      <a href="#products" class="relative overflow-hidden px-10 py-4 border border-purple bg-purple/10 text-purple-bright text-[0.72rem] font-semibold tracking-[0.2em] uppercase rounded-sm transition-all hover:shadow-[0_0_30px_rgba(155,89,247,0.3)] hover:text-white">
+      <a href="#products" class="relative overflow-hidden px-10 py-4 border border-secondary bg-secondary/10 text-line-bright text-[0.72rem] font-semibold tracking-[0.2em] uppercase rounded-sm transition-all hover:shadow-[0_0_30px_rgba(155,89,247,0.3)] hover:text-white">
         Enter the Field →
       </a>
-      <a href="#about" class="px-9 py-4 border border-purple/20 text-muted text-[0.72rem] font-semibold tracking-[0.2em] uppercase rounded-sm transition-all hover:text-lavender hover:border-purple/40">
+      <a href="#about" class="px-9 py-4 border border-secondary/20 text-muted text-[0.72rem] font-semibold tracking-[0.2em] uppercase rounded-sm transition-all hover:text-lavender hover:border-secondary/40">
         Our Ritual
       </a>
     </div>
     <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-space text-[0.6rem] tracking-widest text-muted uppercase hero-anim-5">
-      <div class="scroll-line-anim w-[1px] h-12 bg-gradient-to-b from-purple to-transparent"></div>
+      <div class="scroll-line-anim w-[1px] h-12 bg-gradient-to-b from-secondary to-transparent"></div>
       <span>scroll</span>
     </div>
   </section>
@@ -52,18 +52,18 @@ document.getElementById('app').innerHTML = `
   </div>
   <hr>
   <!-- PRODUCTS -->
-  <section id="products" class="px-6 lg:px-20 py-28 relative z-10">
+  <section id="products" class="px-6 lg:px-20 py-28 relative z-10 bg-linear-to-t from-main to-test-color">
     <div class="reveal flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
       <div>
-        <div class="flex items-center gap-4 font-space text-[0.62rem] tracking-[0.3em] uppercase text-purple mb-3">
-          <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-purple"></span> Current Transmission
+        <div class="flex items-center gap-4 font-space text-[0.62rem] tracking-[0.3em] uppercase text-secondary mb-3">
+          <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-secondary"></span> Current Transmission
         </div>
         <h2 class="font-bebas text-5xl lg:text-7xl tracking-wider leading-none">
-          OBJECTS <span class="text-purple-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">FROM</span><br>THE FIELD
+          OBJECTS <span class="text-line-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">FROM</span><br>THE FIELD
         </h2>
       </div>
       <div id = "categories" class="flex gap-2">
-        <button class="ftab px-4 py-1.5 border border-purple text-[0.7rem] uppercase tracking-widest text-purple-bright bg-purple/10" data-filter="all">All</button>
+        <button class="ftab px-4 py-1.5 border border-secondary text-[0.7rem] uppercase tracking-widest text-line-bright bg-secondary/10" data-filter="all">All</button>
         <button class="ftab px-4 py-1.5 border border-border text-[0.7rem] uppercase tracking-widest text-muted" data-filter="ritual">Ritual</button>
         <button class="ftab px-4 py-1.5 border border-border text-[0.7rem] uppercase tracking-widest text-muted" data-filter="form">Form</button>
         <button class="ftab px-4 py-1.5 border border-border text-[0.7rem] uppercase tracking-widest text-muted" data-filter="signal">Signal</button>
@@ -82,11 +82,11 @@ document.getElementById('app').innerHTML = `
   </div>
 
   <!-- TESTIMONIALS -->
-  <section class="bg-deep px-6 lg:px-20 py-28 relative z-10" id="testi">
+  <section class="bg-test-color px-6 lg:px-20 py-28 relative z-10" id="testi">
     <div class="reveal mb-12">
-      <div class="font-space text-[0.62rem] tracking-[0.3em] uppercase text-purple mb-3">Transmissions Received</div>
+      <div class="font-space text-[0.62rem] tracking-[0.3em] uppercase text-secondary mb-3">Transmissions Received</div>
       <h2 class="font-bebas text-5xl lg:text-7xl tracking-wider">
-        VOICES FROM <span class="text-purple-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">THE</span><br>OTHER SIDE
+        VOICES FROM <span class="text-line-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">THE</span><br>OTHER SIDE
       </h2>
     </div>
     <div class="testi-grid reveal grid grid-cols-1 lg:grid-cols-[1fr_1.6fr] border border-border overflow-hidden">
@@ -99,15 +99,15 @@ document.getElementById('app').innerHTML = `
 
   <!-- NEWSLETTER -->
   <section class="text-center px-6 py-32 relative z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(155,89,247,0.1)_0%,transparent_60%)]" id="newsletter">
-    <p class="font-space text-[0.7rem] tracking-[0.3em] uppercase text-purple mb-6">— Open Your Channel —</p>
+    <p class="font-space text-[0.7rem] tracking-[0.3em] uppercase text-secondary mb-6">— Open Your Channel —</p>
     <h2 class="font-bebas text-5xl lg:text-7xl tracking-[0.08em] mb-4">
-      TUNE INTO <span class="text-purple-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">THE</span><br>FREQUENCY
+      TUNE INTO <span class="text-line-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">THE</span><br>FREQUENCY
     </h2>
     <p class="text-[0.78rem] font-light tracking-widest text-muted mb-10">First access to drops · Transmissions from the studio · Objects before the field opens</p>
     <div class="flex max-w-[500px] mx-auto border border-border">
       <input type="email" placeholder="your signal address"
              class="flex-1 bg-transparent px-6 py-4 outline-none font-josefin text-sm tracking-widest text-white placeholder:text-muted"/>
-      <button class="px-8 py-4 bg-purple/15 border-l border-border font-semibold text-[0.72rem] uppercase tracking-[0.2em] text-purple-bright hover:bg-purple/25 transition-all">Tune In →</button>
+      <button class="px-8 py-4 bg-secondary/15 border-l border-border font-semibold text-[0.72rem] uppercase tracking-[0.2em] text-line-bright hover:bg-secondary/25 transition-all">Tune In →</button>
     </div>
   </section>
 
@@ -120,10 +120,10 @@ const productsGrid = document.getElementById('products-grid')
 document.querySelectorAll('.ftab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.ftab').forEach(b => {
-      b.classList.remove('border-purple', 'text-purple-bright', 'bg-purple/10')
+      b.classList.remove('border-secondary', 'text-line-bright', 'bg-secondary/10')
       b.classList.add('border-border', 'text-muted')
     })
-    btn.classList.add('border-purple', 'text-purple-bright', 'bg-purple/10')
+    btn.classList.add('border-secondary', 'text-line-bright', 'bg-secondary/10')
     btn.classList.remove('border-border', 'text-muted')
 
     const filter   = btn.dataset.filter

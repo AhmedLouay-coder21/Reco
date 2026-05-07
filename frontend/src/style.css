@@ -1,56 +1,85 @@
 @import "tailwindcss";
 
 @theme {
-  --color-main: #111b3c;
-  --color-deep: #e5e5e5;
-  --color-surface: #ffffff;
-  --color-surface2: #f9f9f9;
-  --color-products-section: #fcf8f3;
-  --color-stars: #f96d00;
+--color-test-color: #F5F0E8;
 
-  --color-purple: #f96d00;
-  --color-purple-bright: #f96d00;
-  --color-purple-dim: #f96d00;
-  --color-glow: rgba(155, 89, 247, 0.2);
-  --color-glow2: rgba(155, 89, 247, 0.05);
-  
-  --color-violet: #7c3aed;
-  --color-lavender: #a78bfa;
-  --color-white: #1a1a1a;
-  /* text color */
-  --color-muted: white;
-  --color-border: rgba(0, 0, 0, 0.1);
+--color-title: #D4A017;
+
+--color-cursor: rgba(184, 134, 11, 0.15);
+--color-cursor-ring: rgba(184, 134, 11, 0.5);
+
+--color-main: #FFFFFF;
+--color-deep: #F5F5F5;
+--color-surface: #FFFFFF;
+--color-surface2: #FAFAFA;
+--color-products-section: #FDFBF5;
+--color-stars: #B8860B;
+
+--color-pulse-glow1: rgba(255, 215, 0, 0.5);
+--color-pulse-glow2: rgba(218, 165, 32, 0.4);
+--color-pulse-glow3: rgba(184, 134, 11, 0.3);
+--color-pulse-glow4: rgba(255, 240, 200, 0.8);
+--color-pulse-glow5: rgba(218, 165, 32, 0.6);
+--color-pulse-glow6: rgba(184, 134, 11, 0.3);
+
+--color-secondary: #B8860B;
+--color-line-bright: #FFD700;
+--color-line-dim: #D4A017;
+--color-glow: rgba(184, 134, 11, 0.2);
+--color-glow2: rgba(184, 134, 11, 0.05);
+
+--color-product-card-bg: white;
+
+--color-violet: #96700A;
+--color-lavender: #7A5C08;
+--color-white: #1A1A1A;
+--color-muted: #6B6B6B;
+--color-border: rgba(0, 0, 0, 0.1);
 
   --font-bebas: "Bebas Neue", sans-serif;
   --font-josefin: "Josefin Sans", sans-serif;
   --font-space: "Space Mono", monospace;
 }
-@media (prefers-color-scheme: dark)
-{
-    :root {
-    --color-main: #04010a;
-    --color-deep: #07020f;
-    --color-surface: #0d0520;
-    --color-surface2: #120730;
-    --color-products-section: #04010a;
-    --color-stars: white;
-    
-    --color-purple: #9b59f7;
-    --color-purple-bright: #bf8fff;
-    --color-purple-dim: #5a2fa0;
-    --color-glow: rgba(155, 89, 247, 0.35);
-    --color-glow2: rgba(155, 89, 247, 0.12);
-    
-    --color-violet: #7c3aed;
-    --color-lavender: #d4b8ff;
-    --color-white: #f0e8ff;
-    --color-muted: #7a6b99;
-    --color-border: rgba(155, 89, 247, 0.2);
 
-    --font-bebas: "Bebas Neue", sans-serif;
-    --font-josefin: "Josefin Sans", sans-serif;
-    --font-space: "Space Mono", monospace;
-    }
+.dark {
+--color-test-color: rgba(0, 0, 0, 0);
+
+--color-title: #bf8fff;
+
+--color-cursor: rgba(155,89,247,0.15);
+--color-cursor-ring: rgba(155,89,247,0.5);
+
+--color-main: #04010a;
+--color-deep: #07020f;
+--color-surface: #0d0520;
+--color-surface2: #120730;
+--color-products-section: #04010a;
+--color-stars: white;
+
+--color-pulse-glow1: rgba(155,89,247,0.35);
+--color-pulse-glow2: rgba(155,89,247,0.4); 
+--color-pulse-glow3: rgba(155,89,247,0.2);
+--color-pulse-glow4: rgba(155,89,247,0.8);
+--color-pulse-glow5: rgba(155,89,247,0.6);
+--color-pulse-glow6: rgba(155,89,247,0.3);
+
+--color-secondary: #9b59f7;
+--color-line-bright: #bf8fff;
+--color-line-dim: #5a2fa0;
+--color-glow: rgba(155, 89, 247, 0.35);
+--color-glow2: rgba(155, 89, 247, 0.12);
+
+--color-product-card-bg: #07020f;
+
+--color-violet: #7c3aed;
+--color-lavender: #d4b8ff;
+--color-white: #f0e8ff;
+--color-muted: #7a6b99;
+--color-border: rgba(155, 89, 247, 0.2);
+
+--font-bebas: "Bebas Neue", sans-serif;
+--font-josefin: "Josefin Sans", sans-serif;
+--font-space: "Space Mono", monospace;
 }
 @layer base {
   body {
@@ -62,7 +91,7 @@
 }
 hr
 {
-    color: var(--color-purple);
+    color: var(--color-secondary);
     border: 5px solid;
 }
 #products
@@ -76,15 +105,15 @@ hr
 /* CURSOR */
 .cursor {
     position: fixed; width: 12px; height: 12px; border-radius: 50%;
-    background: var(--color-purple);
-    box-shadow: 0 0 16px 4px var(--color-glow), 0 0 40px 8px rgba(155,89,247,0.15);
+    background: var(--color-secondary);
+    box-shadow: 0 0 16px 4px var(--color-glow), 0 0 40px 8px var(--color-cursor);
     pointer-events: none; z-index: 9999;
     transition: transform 0.1s; transform: translate(-50%, -50%);
 }
 
 .cursor-ring {
     position: fixed; width: 36px; height: 36px; border-radius: 50%;
-    border: 1px solid rgba(155,89,247,0.5);
+    border: 1px solid var(--color-cursor-ring);
     pointer-events: none; z-index: 9998;
     transition: transform 0.18s ease, width 0.2s, height 0.2s, border-color 0.2s;
     transform: translate(-50%, -50%);
@@ -108,8 +137,8 @@ hr
 
 /* GLOW ANIMATIONS */
 @keyframes pulseGlow {
-    0%, 100% { text-shadow: 0 0 20px rgba(255, 115, 0, 0.35), 0 0 60px rgba(255, 115, 0, 0.4), 0 0 120px rgba(255, 115, 0, 0.2); }
-    50% { text-shadow: 0 0 40px rgba(255, 115, 0, 0.8), 0 0 100px rgba(255, 115, 0, 0.6), 0 0 200px rgba(255, 115, 0,0.3); }
+    0%, 100% { text-shadow: 0 0 20px var(--color-pulse-glow1), 0 0 60px var(--color-pulse-glow2), 0 0 120px var(--color-pulse-glow3); }
+    50% { text-shadow: 0 0 40px var(--color-pulse-glow4), 0 0 100px var(--color-pulse-glow5), 0 0 200px var(--color-pulse-glow6); }
 }
 
 /* PRODUCT SHAPES */
@@ -118,7 +147,7 @@ hr
     50% { transform: translateY(-15px) rotate(5deg) } 
 }
 
-.ps-orb { animation: orbFloat 6s ease-in-out infinite; background: radial-gradient(circle at 35% 35%, #bf8fff, #7c3aed, #5a2fa0); }
+.ps-orb { animation: orbFloat 6s ease-in-out infinite 1s; transform: rotate(15deg); }
 .ps-cube { animation: orbFloat 5s ease-in-out infinite 1s; transform: rotate(15deg); }
 .ps-ring { animation: orbFloat 7s ease-in-out infinite 0.5s; }
 .ps-diamond { animation: orbFloat 5.5s ease-in-out infinite 1.5s; }
@@ -127,14 +156,14 @@ hr
 
 /* HERO TITLE */
 .hero-title {
-    -webkit-text-stroke: 1px var(--color-purple-dim);
+    -webkit-text-stroke: 1px var(--color-line-dim);
     color: transparent;
     line-height: 0.9;
 }
 
 .glow-word {
     -webkit-text-stroke: 0px;
-    color: var(--color-purple-bright);
+    color: var(--color-title);
     animation: pulseGlow 4s ease-in-out infinite;
 }
 
@@ -146,7 +175,7 @@ hr
                 transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .reveal.vis {
-    color: var(--color-purple);
+    color: var(--color-secondary);
     opacity: 1;
     transform: none;
 }

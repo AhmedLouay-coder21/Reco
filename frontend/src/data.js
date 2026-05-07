@@ -12,7 +12,7 @@ export const NAV_LINKS = [
 export const MARQUEE_ITEMS = [
   'Free transmission over $200',
   'New frequency drops weekly',
-  'Handcrafted in the void',
+  'Handcrafted in the main',
   '12,000+ channels open',
   'Limited objects · No restock',
 ]
@@ -26,9 +26,9 @@ export const FEATURES = [
 
 export const PRODUCTS = [
   {
-    shape:    'ps-orb',
-    shapeClass: 'w-32 h-32 rounded-full shadow-[0_0_40px_rgba(155,89,247,0.35),inset_0_0_30px_rgba(255,255,255,0.1)]',
-    bg:       'radial-gradient(circle at 30% 70%, rgba(92,22,140,0.4) 0%, #07020f 60%)',
+    shape:    'ps-cube',
+    shapeClass: 'w-24 h-24 bg-gradient-to-br from-line-bright to-violet rounded-lg shadow-[0_0_40px_--color-pulse-glow1]',
+    bg:       'radial-gradient(circle at 30% 70%, var(--color-line-dim) 0%, var(--color-product-card-bg) 60%)',
     badge:    '↑ New Drop',
     wishlist: true,
     category: 'Ritual Object',
@@ -40,8 +40,8 @@ export const PRODUCTS = [
   },
   {
     shape:    'ps-cube',
-    shapeClass: 'w-24 h-24 bg-gradient-to-br from-purple-bright to-violet rounded-lg shadow-[0_0_40px_rgba(155,89,247,0.35)]',
-    bg:       'radial-gradient(circle at 70% 30%, rgba(124,58,237,0.3) 0%, #07020f 60%)',
+    shapeClass: 'w-24 h-24 bg-gradient-to-br from-line-bright to-violet rounded-lg shadow-[0_0_40px_--color-pulse-glow1]',
+    bg:       'radial-gradient(circle at 70% 30%, var(--color-line-dim) 0%, var(--color-product-card-bg) 60%)',
     badge:    '⬡ Limited',
     category: 'Form Object',
     categoryIcon: '◉',
@@ -51,20 +51,20 @@ export const PRODUCTS = [
   },
   {
     shape:    'ps-ring',
-    shapeClass: 'w-28 h-28 border-[8px] border-purple-bright rounded-full shadow-[0_0_30px_rgba(155,89,247,0.35),inset_0_0_20px_rgba(155,89,247,0.1)]',
-    bg:       'radial-gradient(circle at 50% 50%, rgba(155,89,247,0.25) 0%, #07020f 60%)',
+    shapeClass: 'w-28 h-28 border-[8px] border-line-bright rounded-full shadow-[0_0_30px_--color-pulse-glow1,inset_0_0_20px_rgba(155,89,247,0.1)]',
+    bg:       'radial-gradient(circle at 50% 50%, var(--color-line-dim) 0%, var(--color-product-card-bg) 60%)',
     badge:    '◆ Signal',
     category: 'Signal Object',
     categoryIcon: '◆',
-    name:     'Portal Ring Void Cast',
+    name:     'Portal Ring main Cast',
     price:    '$225',
     original: '$290',
     tag:      'signal',
   },
   {
     shape:    'ps-diamond',
-    shapeClass: 'w-20 h-20 bg-gradient-to-br from-lavender to-purple [clip-path:polygon(50%_0%,100%_50%,50%_100%,0%_50%)] shadow-[0_0_40px_rgba(155,89,247,0.35)]',
-    bg:       'radial-gradient(circle at 20% 80%, rgba(80,20,120,0.5) 0%, #07020f 60%)',
+    shapeClass: 'w-20 h-20 bg-gradient-to-br from-lavender to-secondary [clip-path:polygon(50%_0%,100%_50%,50%_100%,0%_50%)] shadow-[0_0_40px_--color-pulse-glow1]',
+    bg:       'radial-gradient(circle at 20% 80%, var(--color-line-dim) 0%, var(--color-product-card-bg) 60%)',
     category: 'Ritual Object',
     categoryIcon: '◈',
     name:     'Frequency Stone Series II',
@@ -73,8 +73,8 @@ export const PRODUCTS = [
   },
   {
     shape:    'ps-tri',
-    shapeClass: 'relative w-0 h-0 border-l-[55px] border-r-[55px] border-b-[100px] border-b-transparent after:content-[\'\'] after:absolute after:top-[10px] after:left-[-45px] after:w-0 after:h-0 after:border-l-[45px] after:border-r-[45px] after:border-b-[80px] after:border-b-purple-bright drop-shadow-[0_0_20px_#9b59f7]',
-    bg:       'radial-gradient(circle at 80% 20%, rgba(140,60,200,0.3) 0%, #07020f 60%)',
+    shapeClass: 'relative w-0 h-0 border-l-[55px] border-r-[55px] border-b-[100px] border-b-transparent after:content-[\'\'] after:absolute after:top-[10px] after:left-[-45px] after:w-0 after:h-0 after:border-l-[45px] after:border-r-[45px] after:border-b-[80px] after:border-b-line-bright',
+    bg:       'radial-gradient(circle at 80% 20%, var(--color-line-dim) 0%, var(--color-product-card-bg) 60%)',
     badge:    '↑ Bestseller',
     category: 'Signal Object',
     categoryIcon: '◆',
@@ -85,8 +85,8 @@ export const PRODUCTS = [
   },
   {
     shape:    'ps-hex',
-    shapeClass: 'w-28 h-28 bg-gradient-to-br from-purple to-purple-dim [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)] shadow-[0_0_40px_rgba(155,89,247,0.35)]',
-    bg:       'radial-gradient(circle at 60% 60%, rgba(100,40,170,0.35) 0%, #07020f 60%)',
+    shapeClass: 'w-28 h-28 bg-gradient-to-br from-secondary to-line-dim [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)] shadow-[0_0_40px_--color-pulse-glow1]',
+    bg:       'radial-gradient(circle at 60% 60%, var(--color-line-dim) 0%, var(--color-product-card-bg) 60%)',
     badge:    '⬡ Archive',
     category: 'Form Object',
     categoryIcon: '◉',
