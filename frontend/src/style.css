@@ -42,24 +42,7 @@
   --font-josefin: "Josefin Sans", sans-serif;
   --font-space: "Space Mono", monospace;
 }
-
-@utility bg-aurora-gradient {
-  background-image: radial-gradient(circle at 100% 100%, var(--color-pulse-glow1), transparent 50%),
-    radial-gradient(circle at 100% 200%, var(--color-pulse-glow2), transparent 50%),
-    radial-gradient(circle at 50% 0%, var(--color-pulse-glow5), transparent 50%),
-    radial-gradient(circle at 200% 100%, var(--color-secondary), transparent 50%);
-  filter: blur(60px);
-}
 .dark {
-
-  --animate-aurora: aurora 60s linear infinite;
-
-  @keyframes aurora {
-    from { background-position: 50% 50%, 50% 50%; }
-    to { background-position: 350% 50%, 350% 50%; }
-  }
-
-
 --color-test-color: rgba(0, 0, 0, 0);
 
 --color-text-dif: white;
