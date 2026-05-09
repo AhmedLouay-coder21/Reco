@@ -8,9 +8,10 @@ import {
   StatCard, TestimonialFeatured, TestimonialCard,
   Footer, GlowLine
 } from './components.js'
-
+import { Login } from './login.js'
 // ─── GLOBAL LAYOUT (rendered once, never changes) ─────────
 document.getElementById('nav-slot').innerHTML    = Nav(NAV_LINKS)
+document.getElementById('loginBtn').addEventListener('click', Login)
 document.getElementById('footer-slot').innerHTML = Footer(FOOTER_LINKS)
 
 // ─── PAGE CONTENT (goes into #app) ────────────────────────
@@ -69,9 +70,7 @@ document.getElementById('app').innerHTML = `
         <button class="ftab px-4 py-1.5 border border-border text-[0.7rem] uppercase tracking-widest text-muted" data-filter="signal">Signal</button>
       </div>
     </div>
-    <div class="reveal grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border border border-border" id="products-grid">
-      ${PRODUCTS.map(p => ProductCard(p)).join('')}
-    </div>
+
   </section>
 
   ${GlowLine()}

@@ -1,3 +1,6 @@
+import { Login } from './login.js';
+
+
 const localStorageTheme = localStorage.getItem("theme");
 const systemSettingDark = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -20,7 +23,7 @@ let currentThemeSetting = calculateSettingAsThemeString({ localStorageTheme, sys
 
 const navLinkClass = 'text-[0.72rem] font-semibold tracking-[0.2em] uppercase text-muted hover:text-line-bright transition-all duration-300 hover:drop-shadow-[0_0_12px_var(--color-cursor-ring)]'
 
-export function Nav(links, currentPath = '/') {
+export function Nav(links, currentPath = '/' , Login) {
   const linkItems = links.map(({ href, label }) => {
     const isActive = href === currentPath
     const activeClass = isActive ? 'text-line-bright' : ''
@@ -32,8 +35,8 @@ export function Nav(links, currentPath = '/') {
       <a href="/" class="logo font-bebas text-3xl tracking-[0.15em] text-line-bright relative drop-shadow-[0_0_20px_var(--color-line-bright)] text-title">THE FIELD</a>
       <ul class="nav-links hidden md:flex gap-10">${linkItems}</ul>
       <div class="nav-right flex items-center gap-4">
-        <button class="cart-btn group flex items-center gap-2 px-5 py-2 border border-secondary/50 rounded-sm text-[0.72rem] font-semibold tracking-widest uppercase text-line-bright transition-all hover:bg-secondary/10 hover:shadow-[0_0_20px_var(--color-pulse-glow1)]">
-          ⬡ Cart <span class="cart-count bg-secondary text-white w-4 h-4 rounded-full text-[0.65rem] flex items-center justify-center">3</span>
+        <button id="loginBtn" class="cart-btn group flex items-center gap-2 px-5 py-2 border border-secondary/50 rounded-sm text-[0.72rem] font-semibold tracking-widest uppercase text-line-bright transition-all hover:bg-secondary/10 hover:shadow-[0_0_20px_var(--color-pulse-glow1)]">
+          ⬡ Login
         </button>
         <button onclick="document.documentElement.classList.toggle('dark')"
             class="h-12 w-12 rounded-lg p-2 hover:bg-secondary/10 transition-all flex items-center justify-center">
@@ -47,7 +50,8 @@ export function Nav(links, currentPath = '/') {
           </svg>
         </button>
       </div>
-    </nav>`
+    </nav>
+    `
 }
 
 export function Marquee(items) {
@@ -90,8 +94,7 @@ export function ProductCard({ id, shape, shapeClass, bg, badge, wishlist, catego
   return `
     <div class="bg-main p-0 group overflow-hidden transition-colors duration-500 hover:bg-surface" data-product-id="${id}">
       <div class="h-80 overflow-hidden relative flex items-center justify-center" style="background: ${bg}">
-        <div class="${shape} ${shapeClass} transition-transform duration-700 group-hover:scale-105"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,var(--color-line-dim)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="No image here">
         ${badgeHtml}
         ${wishlistHtml}
       </div>
