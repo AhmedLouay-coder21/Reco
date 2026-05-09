@@ -1,0 +1,76 @@
+package com.Reco.backend.service;
+
+import com.Reco.backend.config.JwtService;
+import com.Reco.backend.dto.request.LoginRequest;
+import com.Reco.backend.dto.request.RegisterRequest;
+import com.Reco.backend.dto.response.AuthResponse;
+import com.Reco.backend.exception.DuplicateEmailException;
+import com.Reco.backend.model.Role;
+import com.Reco.backend.model.User;
+import com.Reco.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+    public AuthResponse register(RegisterRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException("Email already registered");
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateEmailException("Username already taken");
+        }
+
+        var user = User.builder()
+                .firstName(request.getFirstname())
+                .lastName(request.getLastname())
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .role(Role.CUSTOMER)
+                .build();
+        userRepository.save(user);
+
+        return getAuthResponse(user);
+    }
+
+    public AuthResponse login(LoginRequest request) {
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow();
+
+        return getAuthResponse(user);
+    }
+
+    private AuthResponse getAuthResponse(User user) {
+        Map<String, Object> claims = Map.of("role",user.getRole());
+        var jwtToken = jwtService.generateToken(claims, user);
+
+        return AuthResponse.builder()
+                .accessToken(jwtToken)
+                .email(user.getEmail())
+                .firstname(user.getFirstName())
+                .lastname(user.getLastName())
+                .expiresIn(jwtService.getAccessTokenExpiration())
+                .build();
+    }
+}
