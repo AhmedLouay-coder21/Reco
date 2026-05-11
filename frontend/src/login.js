@@ -11,7 +11,12 @@ const loginMock = async (credentials) => {
 
 // this should be toggled to false after the backend logic is done
 const isDev = false;
-const login = (creds) => isDev ? loginMock(creds) : fetch('/api/v1/auth/login', { /* fetch config */ });
+const login = (creds) => isDev ? loginMock(creds) : fetch('http://localhost:8080/api/v1/auth/login', {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+    },
+    body: JSON.stringify(creds), });
 
 export function Login() 
 {
@@ -279,9 +284,10 @@ async function handleLoginSubmit(e)
         submitBtn.disabled = true;
    
         const response = await login({ email: email, password: password });
-        localStorage.setItem("auth_token", response.token);
+        const data = await response.json();
+        localStorage.setItem("auth_token", data.accessToken);
         
-        alert(`Welcome back, ${response.user.name}!`);
+        alert(`Welcome back, ${data.firstname}!`);
     }
 
     catch (error)
