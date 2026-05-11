@@ -1,4 +1,4 @@
-import { Login } from './login.js';
+import { Login } from '../pages/login.js';
 
 
 const localStorageTheme = localStorage.getItem("theme");
@@ -79,7 +79,7 @@ export function FeatureCard({ icon, title, desc }, isLast = false) {
     </div>`
 }
 
-// Used in HomeView AND ShopView one component, two places.
+
 export function ProductCard({ id, shape, shapeClass, bg, badge, wishlist, category, categoryIcon, name, price, original }) {
   const badgeHtml = badge
     ? `<div class="absolute top-3 left-3 border border-secondary/40 bg-main/80 px-2 py-1 font-space text-[0.58rem] tracking-widest text-line-bright uppercase">${badge}</div>`
@@ -162,7 +162,6 @@ export function TestimonialCard({ quote, initials, name, role }) {
     </div>`
 }
 
-// Used on EVERY page — rendered once in main.js.
 export function Footer(links) {
   const columns = Object.entries(links).map(([heading, items]) => {
     const listItems = items.map(label =>
@@ -194,6 +193,7 @@ export function Footer(links) {
     </div>`
 }
 
-export function GlowLine() {
+export function GlowLine() 
+{
   return `<div class="glow-line h-[1px] w-full bg-gradient-to-r from-transparent via-line-dim via-line-bright via-line-dim to-transparent shadow-[0_0_10px_1px_--color-pulse-glow1] relative z-10"></div>`
 }

@@ -1,24 +1,10 @@
+import { login } from '../api/auth.js';
 let diagonalLineDir = 0;
 let textPos = 0;
 let titlePos = 0;
-const loginMock = async (credentials) => {
-    await new Promise(res => setTimeout(res, 1000)); // time out 1 second to simulate network lag
-    if (credentials.email === "admin@test.com" && credentials.password === "12345678") {
-        return { token: "abc-123-xyz", user: { name: "Ahmad" } };
-    }
-    throw new Error("Invalid email or password");
-};
 
-// this should be toggled to false after the backend logic is done
-const isDev = false;
-const login = (creds) => isDev ? loginMock(creds) : fetch('http://localhost:8080/api/v1/auth/login', {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify(creds), });
 
-export function Login() 
+export function Login()
 {
     const main = document.querySelector("main");
     if (!main) return;
@@ -31,8 +17,7 @@ export function Login()
     const footer = document.getElementById("footer-slot");
     if (footer) footer.innerHTML = "";
 
-    main.className =
-        "relative flex h-screen items-center justify-center overflow-hidden";
+
 
     const loginBox = document.createElement("div");
     loginBox.id = "loginBox";
@@ -284,10 +269,11 @@ async function handleLoginSubmit(e)
         submitBtn.disabled = true;
    
         const response = await login({ email: email, password: password });
-        const data = await response.json();
-        localStorage.setItem("auth_token", data.accessToken);
-        
-        alert(`Welcome back, ${data.firstname}!`);
+        //for real api fetch to work change the response to data and remove this comment
+        // const data = await response.json();
+        //here
+        localStorage.setItem("auth_token", response.accessToken);
+        window.location.href = '/';
     }
 
     catch (error)
