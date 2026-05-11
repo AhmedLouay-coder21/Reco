@@ -11,6 +11,8 @@ import com.Reco.backend.model.User;
 import com.Reco.backend.repository.ProductRepository;
 import com.Reco.backend.repository.ReviewRepository;
 import com.Reco.backend.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class ReviewService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
+
     public ReviewService(ReviewRepository reviewRepository,
                          ProductRepository productRepository,
                          UserRepository userRepository) {
@@ -38,8 +41,14 @@ public class ReviewService {
     public ReviewResponse createReview(ReviewCreateRequest request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-        User user = userRepository.findById(request.getUserId())
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if(reviewRepository.findByUserAndProduct(user,product).isPresent()){
+            throw new IllegalArgumentException("You have already reviewed this product");
+        }
 
         Review review = Review.builder()
                 .rating(request.getRating())
@@ -79,8 +88,10 @@ public class ReviewService {
     public ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
 
-        if (!review.getUser().getId().equals(request.getUserId())) {
+        if (!review.getUser().getEmail().equals(userEmail)) {
             throw new IllegalArgumentException("User not allowed to update this review");
         }
 
@@ -98,11 +109,13 @@ public class ReviewService {
         return toResponse(saved);
     }
 
-    public void deleteReview(Long reviewId, Long userId) {
+    public void deleteReview(Long reviewId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
 
-        if (!review.getUser().getId().equals(userId)) {
+        if (!review.getUser().getEmail().equals(userEmail)) {
             throw new IllegalArgumentException("User not allowed to delete this review");
         }
 

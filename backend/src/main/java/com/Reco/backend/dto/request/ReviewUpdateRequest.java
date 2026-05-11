@@ -15,9 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReviewUpdateRequest {
 
-    @NotNull
-    private Long userId;
-
     @Min(1)
     @Max(5)
     private Integer rating;

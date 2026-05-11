@@ -18,8 +18,6 @@ public class ReviewCreateRequest {
     @NotNull
     private Long productId;
 
-    @NotNull
-    private Long userId;
 
     @NotNull
     @Min(1)

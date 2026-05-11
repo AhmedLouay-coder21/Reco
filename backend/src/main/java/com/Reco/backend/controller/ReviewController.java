@@ -7,12 +7,13 @@ import com.Reco.backend.dto.response.ReviewResponse;
 import com.Reco.backend.service.ReviewService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reviews")
+@RequestMapping("/api/v1/reviews")
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -22,6 +23,7 @@ public class ReviewController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ReviewResponse> createReview(@Valid @RequestBody ReviewCreateRequest request) {
         return ResponseEntity.ok(reviewService.createReview(request));
     }
@@ -42,15 +44,16 @@ public class ReviewController {
     }
 
     @PutMapping("/{reviewId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ReviewResponse> updateReview(@PathVariable Long reviewId,
                                                        @Valid @RequestBody ReviewUpdateRequest request) {
         return ResponseEntity.ok(reviewService.updateReview(reviewId, request));
     }
 
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId,
-                                             @RequestParam Long userId) {
-        reviewService.deleteReview(reviewId, userId);
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
+        reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
 }

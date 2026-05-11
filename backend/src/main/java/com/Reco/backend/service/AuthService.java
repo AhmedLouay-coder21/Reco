@@ -5,12 +5,16 @@ import com.Reco.backend.dto.request.LoginRequest;
 import com.Reco.backend.dto.request.RegisterRequest;
 import com.Reco.backend.dto.response.AuthResponse;
 import com.Reco.backend.exception.DuplicateEmailException;
+import com.Reco.backend.exception.ResourceNotFoundException;
 import com.Reco.backend.model.Role;
 import com.Reco.backend.model.User;
 import com.Reco.backend.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +60,7 @@ public class AuthService {
         );
 
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return getAuthResponse(user);
     }
@@ -72,5 +76,37 @@ public class AuthService {
                 .lastname(user.getLastName())
                 .expiresIn(jwtService.getAccessTokenExpiration())
                 .build();
+    }
+
+    public AuthResponse registerAdmin(@Valid RegisterRequest request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String adminEmail = authentication.getName();
+        User adminRequest = userRepository.findByEmail(adminEmail).orElseThrow(()-> new ResourceNotFoundException("Admin not found"));
+
+
+        if (!adminRequest.getRole().equals(Role.ADMIN)){
+            throw new IllegalArgumentException("Only admins can create adminRequest account");
+        }
+
+        if(userRepository.existsByUsername(request.getEmail())){
+            throw new DuplicateEmailException("Email already registered");
+        }
+
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new DuplicateEmailException("username already taken");
+        }
+
+        var admin = User.builder()
+                .firstName(request.getFirstname())
+                .lastName(request.getLastname())
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .role(Role.ADMIN)
+                .build();
+        userRepository.save(admin);
+        return getAuthResponse(admin);
     }
 }
