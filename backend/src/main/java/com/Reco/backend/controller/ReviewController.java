@@ -6,6 +6,8 @@ import com.Reco.backend.dto.response.AverageRatingResponse;
 import com.Reco.backend.dto.response.ReviewResponse;
 import com.Reco.backend.service.ReviewService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +27,7 @@ public class ReviewController {
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ReviewResponse> createReview(@Valid @RequestBody ReviewCreateRequest request) {
-        return ResponseEntity.ok(reviewService.createReview(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewService.createReview(request));
     }
 
     @GetMapping("/product/{productId}")

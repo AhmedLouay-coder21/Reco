@@ -51,6 +51,9 @@ public class User implements UserDetails{
     @Column(name = "created_at",nullable = false,updatable = false)
     private LocalDateTime createdAt;
 
+    public String getUsernameField() {
+        return username;  // Returns the actual username field
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

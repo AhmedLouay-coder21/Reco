@@ -6,6 +6,7 @@ import com.Reco.backend.dto.response.AuthResponse;
 import com.Reco.backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class AuthController {
             @Valid
             RegisterRequest request
     ){
-        return  ResponseEntity.ok(service.register(request));
+        return  ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
     }
 
     @PostMapping("/register-admin")
@@ -36,7 +37,7 @@ public class AuthController {
             @RequestBody
             RegisterRequest request
     ){
-        return ResponseEntity.ok(service.registerAdmin(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.registerAdmin(request));
     }
 
     @PostMapping("/login")

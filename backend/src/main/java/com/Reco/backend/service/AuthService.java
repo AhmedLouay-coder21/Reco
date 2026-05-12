@@ -66,7 +66,7 @@ public class AuthService {
     }
 
     private AuthResponse getAuthResponse(User user) {
-        Map<String, Object> claims = Map.of("role",user.getRole());
+        Map<String, Object> claims = Map.of("role", user.getRole().name());
         var jwtToken = jwtService.generateToken(claims, user);
 
         return AuthResponse.builder()
