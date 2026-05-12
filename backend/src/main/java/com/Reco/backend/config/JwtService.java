@@ -1,5 +1,6 @@
 package com.Reco.backend.config;
 
+import com.Reco.backend.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -69,6 +70,9 @@ public class JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));}
 
     private Claims extractAllClaims(String token){
         return Jwts.parser()

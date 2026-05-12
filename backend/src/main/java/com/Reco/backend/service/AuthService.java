@@ -74,6 +74,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .firstname(user.getFirstName())
                 .lastname(user.getLastName())
+                .role(user.getRole().name())
                 .expiresIn(jwtService.getAccessTokenExpiration())
                 .build();
     }
