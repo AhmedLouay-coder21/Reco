@@ -7,12 +7,14 @@ import {
 } from './components/components.js'
 import { Login } from './pages/login.js'
 import { HomeView } from './pages/home.js'
-import { isAuthenticated, getUserFirstName } from './api/auth.js'
+import { getUserRole, isAuthenticated, getUserFirstName } from './api/auth.js'
+import { DashboardView } from './pages/dashboard.js'
+
 
 export function GenerateMain()
 {
-document.getElementById('nav-slot').innerHTML = Nav(NAV_LINKS)
-document.getElementById('footer-slot').innerHTML = Footer(FOOTER_LINKS)
+  document.getElementById('nav-slot').innerHTML = Nav(NAV_LINKS)
+  document.getElementById('footer-slot').innerHTML = Footer(FOOTER_LINKS)
   
   const loginBtn = document.getElementById('loginBtn');
   
@@ -23,7 +25,7 @@ document.getElementById('footer-slot').innerHTML = Footer(FOOTER_LINKS)
       loginBtn.textContent = getUserFirstName()[0].toUpperCase();
       
       loginBtn.addEventListener("click", () => {
-          alert("Profile clicked");
+          DashboardView();
       });
   }
 

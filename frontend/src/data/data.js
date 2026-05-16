@@ -1,7 +1,4 @@
-// ─── ALL SITE CONTENT LIVES HERE ──────────────────────────
-// When content changes, you only touch this file.
-// When you add a product, you add one object here — not 20 lines of HTML.
-
+// this file should contain data only
 export const NAV_LINKS = [
   { href: '#products', label: 'Objects' },
   { href: '#about',    label: 'Ritual'  },

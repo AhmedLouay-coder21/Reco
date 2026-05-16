@@ -268,11 +268,13 @@ async function handleLoginSubmit(e)
         btnText.innerText = "VERIFYING...";
         submitBtn.disabled = true;
    
-        const response = await login({ email: email, password: password });
-        //for real api fetch to work change the response to data and remove this comment
-        // const data = await response.json();
-        //here
-        localStorage.setItem("auth_token", response.accessToken);
+        const data = await login({ email, password });
+
+        console.log(data);
+        localStorage.setItem("auth_token", data.accessToken);
+        localStorage.setItem("firstname", data.firstname);
+        localStorage.setItem("lastname", data.lastname);
+        localStorage.setItem("role", data.role);
         window.location.href = '/';
     }
 
