@@ -1,5 +1,6 @@
 package com.Reco.backend.dto.response;
 
+import com.Reco.backend.model.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +14,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CartResponse {
+public class OrderResponse {
 
-    private Long cartId;
-    private Instant updatedAt;
-    private List<CartItemResponse> items;
-    private int totalQuantity;
-    private BigDecimal subtotal;
+    private Long id;
+    private Long userId;
+    private BigDecimal totalAmount;
+    private OrderStatus status;
+    private Instant createdAt;
+    private List<OrderItemResponse> items;
 }

@@ -6,18 +6,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CartResponse {
+public class OrderItemResponse {
 
-    private Long cartId;
-    private Instant updatedAt;
-    private List<CartItemResponse> items;
-    private int totalQuantity;
-    private BigDecimal subtotal;
+    private Long productId;
+    private String productName;
+    private int quantity;
+    private BigDecimal priceAtPurchase;
+    private BigDecimal lineTotal;
 }

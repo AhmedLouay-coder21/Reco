@@ -12,10 +12,10 @@ import lombok.*;
 public class RegisterRequest {
 
     @NotBlank
-    private String firstname;
+    private String firstName;
 
     @NotBlank
-    private String lastname;
+    private String lastName;
 
     @NotBlank
     private String username;

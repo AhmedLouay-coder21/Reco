@@ -8,7 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -56,7 +56,7 @@ public class Product {
 
     @CreationTimestamp
     @Column(name = "created_at",nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @ManyToOne()
     @JoinColumn(name = "category_id",nullable = false)

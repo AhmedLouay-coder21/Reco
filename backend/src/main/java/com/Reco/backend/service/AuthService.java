@@ -11,16 +11,19 @@ import com.Reco.backend.model.User;
 import com.Reco.backend.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
@@ -38,8 +41,8 @@ public class AuthService {
         }
 
         var user = User.builder()
-                .firstName(request.getFirstname())
-                .lastName(request.getLastname())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -72,8 +75,8 @@ public class AuthService {
         return AuthResponse.builder()
                 .accessToken(jwtToken)
                 .email(user.getEmail())
-                .firstname(user.getFirstName())
-                .lastname(user.getLastName())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .role(user.getRole().name())
                 .expiresIn(jwtService.getAccessTokenExpiration())
                 .build();
@@ -88,10 +91,10 @@ public class AuthService {
 
 
         if (!adminRequest.getRole().equals(Role.ADMIN)){
-            throw new IllegalArgumentException("Only admins can create adminRequest account");
+            throw new AccessDeniedException("Only admins can create admin account");
         }
 
-        if(userRepository.existsByUsername(request.getEmail())){
+        if(userRepository.existsByEmail(request.getEmail())){
             throw new DuplicateEmailException("Email already registered");
         }
 
@@ -100,8 +103,8 @@ public class AuthService {
         }
 
         var admin = User.builder()
-                .firstName(request.getFirstname())
-                .lastName(request.getLastname())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))

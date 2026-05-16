@@ -41,13 +41,15 @@ public class CartController {
 
     @DeleteMapping("/items/{productId}")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<CartResponse> removeItem(@PathVariable Long productId) {
-        return ResponseEntity.ok(cartService.removeItem(productId));
+    public ResponseEntity<Void> removeItem(@PathVariable Long productId) {
+        cartService.removeItem(productId);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/clear")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<CartResponse> clearCart() {
-        return ResponseEntity.ok(cartService.clearCart());
+    public ResponseEntity<Void> clearCart() {
+        cartService.clearCart();
+        return ResponseEntity.noContent().build();
     }
 }
