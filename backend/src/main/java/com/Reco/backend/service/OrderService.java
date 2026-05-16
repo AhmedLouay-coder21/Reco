@@ -14,6 +14,7 @@ import com.Reco.backend.repository.CartItemRepository;
 import com.Reco.backend.repository.CartRepository;
 import com.Reco.backend.repository.OrderItemRepository;
 import com.Reco.backend.repository.OrderRepository;
+import com.Reco.backend.repository.PaymentRepository;
 import com.Reco.backend.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,17 +33,20 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
 
     public OrderService(OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
                         CartRepository cartRepository,
                         CartItemRepository cartItemRepository,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.userRepository = userRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public OrderResponse createOrder() {
@@ -136,6 +140,7 @@ public class OrderService {
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        paymentRepository.findByOrder(order).ifPresent(paymentRepository::delete);
         List<OrderItem> items = orderItemRepository.findByOrder(order);
         orderItemRepository.deleteAll(items);
         orderRepository.delete(order);
