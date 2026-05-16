@@ -2,13 +2,12 @@ package com.Reco.backend.service;
 
 import com.Reco.backend.dto.request.PaymentProcessRequest;
 import com.Reco.backend.dto.response.PaymentResponse;
+import com.Reco.backend.exception.DuplicatePaymentException;
+import com.Reco.backend.exception.OrderNotEligibleException;
+import com.Reco.backend.exception.PaymentMismatchException;
 import com.Reco.backend.exception.ResourceNotFoundException;
 import com.Reco.backend.gateway.MockPaymentGateway;
-import com.Reco.backend.model.Order;
-import com.Reco.backend.model.OrderStatus;
-import com.Reco.backend.model.Payment;
-import com.Reco.backend.model.PaymentStatus;
-import com.Reco.backend.model.User;
+import com.Reco.backend.model.*;
 import com.Reco.backend.repository.OrderRepository;
 import com.Reco.backend.repository.PaymentRepository;
 import com.Reco.backend.repository.UserRepository;
@@ -42,15 +41,15 @@ public class PaymentService {
         verifyOrderOwnership(order);
 
         if (order.getStatus() != OrderStatus.PENDING) {
-            throw new IllegalArgumentException("Order is not eligible for payment");
+            throw new OrderNotEligibleException("Order is not eligible for payment");
         }
 
         if (paymentRepository.findByOrder(order).isPresent()) {
-            throw new IllegalArgumentException("Payment already exists for this order");
+            throw new DuplicatePaymentException("Payment already exists for this order");
         }
 
         if (order.getTotalAmount().compareTo(request.getAmount()) != 0) {
-            throw new IllegalArgumentException("Payment amount does not match order total");
+            throw new PaymentMismatchException("Payment amount does not match order total");
         }
 
         PaymentStatus status = mockPaymentGateway.process(
@@ -61,7 +60,7 @@ public class PaymentService {
 
         Payment payment = Payment.builder()
                 .order(order)
-                .amount(request.getAmount())
+                .amount(order.getTotalAmount())
                 .status(status)
                 .paymentMethod(request.getPaymentMethod())
                 .build();
@@ -84,6 +83,8 @@ public class PaymentService {
         Payment payment = paymentRepository.findByOrder(order)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
 
+        verifyOrderOwnership(order);
+
         return toResponse(payment);
     }
 
@@ -92,12 +93,15 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
 
+
+        verifyOrderOwnership(payment.getOrder());
+
         return toResponse(payment);
     }
 
     private void verifyOrderOwnership(Order order) {
         User user = getCurrentUser();
-        if (!order.getUser().getId().equals(user.getId())) {
+        if (!order.getUser().getId().equals(user.getId()) && ! user.getRole().equals(Role.ADMIN)) {
             throw new ResourceNotFoundException("Order not found");
         }
     }

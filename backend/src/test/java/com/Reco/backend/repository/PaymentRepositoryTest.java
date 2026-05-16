@@ -23,7 +23,9 @@ public class PaymentRepositoryTest {
     void testThatVerifyPaymentBuildAllFields(){
 
         User user = User.builder()
-                .username("Youssef")
+                .firstName("Youssef")
+                .lastName("Waleed")
+                .username("whiteman")
                 .email("Youssef@gmail.com")
                 .role(Role.CUSTOMER)
                 .passwordHash("25252002")
@@ -40,7 +42,6 @@ public class PaymentRepositoryTest {
         Payment payment = Payment.builder()
                 .status(PaymentStatus.SUCCESS)
                 .amount(new BigDecimal("25000"))
-                .order(order)
                 .paymentMethod(PaymentMethod.CREDIT_CARD)
                 .order(order)
                 .build();

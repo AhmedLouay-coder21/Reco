@@ -2,20 +2,11 @@ package com.Reco.backend.service;
 
 import com.Reco.backend.dto.response.OrderItemResponse;
 import com.Reco.backend.dto.response.OrderResponse;
+import com.Reco.backend.exception.CartEmptyException;
+import com.Reco.backend.exception.InsufficientStockException;
 import com.Reco.backend.exception.ResourceNotFoundException;
-import com.Reco.backend.model.Cart;
-import com.Reco.backend.model.CartItem;
-import com.Reco.backend.model.Order;
-import com.Reco.backend.model.OrderItem;
-import com.Reco.backend.model.OrderStatus;
-import com.Reco.backend.model.Product;
-import com.Reco.backend.model.User;
-import com.Reco.backend.repository.CartItemRepository;
-import com.Reco.backend.repository.CartRepository;
-import com.Reco.backend.repository.OrderItemRepository;
-import com.Reco.backend.repository.OrderRepository;
-import com.Reco.backend.repository.PaymentRepository;
-import com.Reco.backend.repository.UserRepository;
+import com.Reco.backend.model.*;
+import com.Reco.backend.repository.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,19 +25,22 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
+    private final ProductRepository productRepository;
 
     public OrderService(OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
                         CartRepository cartRepository,
                         CartItemRepository cartItemRepository,
                         UserRepository userRepository,
-                        PaymentRepository paymentRepository) {
+                        PaymentRepository paymentRepository,
+                        ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.userRepository = userRepository;
         this.paymentRepository = paymentRepository;
+        this.productRepository = productRepository;
     }
 
     public OrderResponse createOrder() {
@@ -56,12 +50,27 @@ public class OrderService {
         List<CartItem> cartItems = cartItemRepository.findByCart(cart);
 
         if (cartItems.isEmpty()) {
-            throw new IllegalArgumentException("Cart is empty");
+            throw new CartEmptyException("Cart is empty");
         }
 
         BigDecimal totalAmount = cartItems.stream()
                 .map(this::cartLineTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        for (CartItem item : cartItems) {
+            Product product = item.getProduct();
+            if (product.getStockQuantity() < item.getQuantity()) {
+                throw new InsufficientStockException(
+                        "Insufficient stock for product: " + product.getName()
+                );
+            }
+        }
+
+        for (CartItem item : cartItems) {
+            Product product = item.getProduct();
+            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+            productRepository.save(product);
+        }
 
         Order order = Order.builder()
                 .user(user)
@@ -83,6 +92,12 @@ public class OrderService {
         orderItemRepository.saveAll(orderItems);
         cartItemRepository.deleteAll(cartItems);
 
+        for (CartItem item : cartItems) {
+            Product product = item.getProduct();
+            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+            productRepository.save(product);
+        }
+
         return toResponse(savedOrder, orderItems);
     }
 
@@ -90,6 +105,8 @@ public class OrderService {
     public OrderResponse getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        verifyOrderOwnership(order);
         return toResponse(order);
     }
 
@@ -118,6 +135,13 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    private void verifyOrderOwnership(Order order) {
+        User user = getCurrentUser();
+        if (!order.getUser().getId().equals(user.getId()) && ! user.getRole().equals(Role.ADMIN)) {
+            throw new ResourceNotFoundException("Order not found");
+        }
+    }
+
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -130,6 +154,8 @@ public class OrderService {
     public List<OrderItemResponse> getOrderItems(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        verifyOrderOwnership(order);
 
         return orderItemRepository.findByOrder(order)
                 .stream()

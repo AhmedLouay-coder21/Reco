@@ -4,7 +4,9 @@ import com.Reco.backend.dto.request.ReviewCreateRequest;
 import com.Reco.backend.dto.request.ReviewUpdateRequest;
 import com.Reco.backend.dto.response.AverageRatingResponse;
 import com.Reco.backend.dto.response.ReviewResponse;
+import com.Reco.backend.exception.DuplicateReviewException;
 import com.Reco.backend.exception.ResourceNotFoundException;
+import com.Reco.backend.exception.ReviewNotOwnedException;
 import com.Reco.backend.model.Product;
 import com.Reco.backend.model.Review;
 import com.Reco.backend.model.User;
@@ -47,7 +49,7 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if(reviewRepository.findByUserAndProduct(user,product).isPresent()){
-            throw new IllegalArgumentException("You have already reviewed this product");
+            throw new DuplicateReviewException("You have already reviewed this product");
         }
 
         Review review = Review.builder()
@@ -92,7 +94,7 @@ public class ReviewService {
         String userEmail = authentication.getName();
 
         if (!review.getUser().getEmail().equals(userEmail)) {
-            throw new IllegalArgumentException("User not allowed to update this review");
+            throw new ReviewNotOwnedException("User not allowed to update this review");
         }
 
         if (request.getRating() != null) {
@@ -116,7 +118,7 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
 
         if (!review.getUser().getEmail().equals(userEmail)) {
-            throw new IllegalArgumentException("User not allowed to delete this review");
+            throw new ReviewNotOwnedException("User not allowed to delete this review");
         }
 
         Product product = review.getProduct();
@@ -150,7 +152,7 @@ public class ReviewService {
                 review.getCreatedAt(),
                 review.getUpdatedAt(),
                 review.getUser().getId(),
-                review.getUser().getUsername(),
+                review.getUser().getUsernameField(),
                 review.getProduct().getId()
         );
     }

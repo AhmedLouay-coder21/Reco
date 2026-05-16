@@ -2,10 +2,9 @@ package com.Reco.backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +21,7 @@ public class Cart {
 
     @UpdateTimestamp
     @Column(name = "updated_at",nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @OneToOne
     @JoinColumn(name = "user_id",nullable = false,unique = true)

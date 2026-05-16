@@ -8,16 +8,16 @@ import com.Reco.backend.exception.ResourceNotFoundException;
 import com.Reco.backend.model.Category;
 import com.Reco.backend.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-
 @Service
+@Transactional
 public class CategoryService {
 
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     public CategoryService(CategoryRepository categoryRepository){
         this.categoryRepository = categoryRepository;

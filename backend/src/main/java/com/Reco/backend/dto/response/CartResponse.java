@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -16,7 +16,7 @@ import java.util.List;
 public class CartResponse {
 
     private Long cartId;
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
     private List<CartItemResponse> items;
     private int totalQuantity;
     private BigDecimal subtotal;
