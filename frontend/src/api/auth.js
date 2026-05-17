@@ -11,6 +11,10 @@ export const login = async (creds) => {
     if (!res.ok) {
         throw new Error(data.message || "Invalid credentials");
     }
+    localStorage.setItem("auth_token", data.accessToken);
+    localStorage.setItem("firstname", data.firstname);
+    localStorage.setItem("lastname", data.lastname);
+    localStorage.setItem("role", data.role);
     return data;
 };
 

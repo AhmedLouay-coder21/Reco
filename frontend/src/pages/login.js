@@ -268,13 +268,7 @@ async function handleLoginSubmit(e)
         btnText.innerText = "VERIFYING...";
         submitBtn.disabled = true;
    
-        const data = await login({ email, password });
-
-        console.log(data);
-        localStorage.setItem("auth_token", data.accessToken);
-        localStorage.setItem("firstname", data.firstname);
-        localStorage.setItem("lastname", data.lastname);
-        localStorage.setItem("role", data.role);
+        await login({ email, password });
         window.location.href = '/';
     }
 

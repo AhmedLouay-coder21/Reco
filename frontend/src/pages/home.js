@@ -1,11 +1,12 @@
 import {
   MARQUEE_ITEMS, FEATURES,
-  STATS, TESTIMONIALS
+  STATS, TESTIMONIALS,
+  PRODUCTS
 } from '../data/data.js'
 import {
   Marquee, FeatureCard,
   StatCard, TestimonialFeatured, TestimonialCard,
-  GlowLine
+  GlowLine, ProductCard
 } from '../components/components.js'
 
 export function HomeView() {
@@ -64,8 +65,10 @@ export function HomeView() {
           <button class="ftab px-4 py-1.5 border border-border text-[0.7rem] uppercase tracking-widest text-muted" data-filter="signal">Signal</button>
         </div>
       </div>
+      <div class="reveal grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border border border-border" id="products-grid">
+        ${PRODUCTS.map(p => ProductCard(p)).join('')}
+      </div>
     </section>
-
     ${GlowLine()}
 
     <!-- STATS -->
