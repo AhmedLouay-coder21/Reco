@@ -19,7 +19,7 @@ public class Seed implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        if (userRepository.count() == 0){
+        if (userRepository.count() == 0) {
             User admin = User.builder()
                     .firstName("Admin")
                     .lastName("Man")

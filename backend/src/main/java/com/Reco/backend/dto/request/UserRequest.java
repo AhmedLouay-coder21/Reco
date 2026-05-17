@@ -1,6 +1,5 @@
 package com.Reco.backend.dto.request;
 
-import com.Reco.backend.model.Role;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

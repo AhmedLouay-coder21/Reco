@@ -23,7 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository,PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -40,14 +40,13 @@ public class UserService {
                 .build();
     }
 
-    public  UserResponse getUserById(Long userId) {
+    public UserResponse getUserById(Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return toResponse(user);
     }
-
 
 
     public List<UserResponse> listUsers() {
@@ -86,8 +85,8 @@ public class UserService {
 
         String authedEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (!user.getEmail().equals(authedEmail)){
-            throw  new ResourceNotFoundException("Cannot update other users profile");
+        if (!user.getEmail().equals(authedEmail)) {
+            throw new ResourceNotFoundException("Cannot update other users profile");
         }
 
         user.setFirstName(request.getFirstName());
@@ -95,7 +94,7 @@ public class UserService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
 
-        User updated  = userRepository.save(user);
+        User updated = userRepository.save(user);
 
         return toResponse(updated);
     }
@@ -107,8 +106,8 @@ public class UserService {
 
         String authedEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (!user.getEmail().equals(authedEmail)){
-            throw  new ResourceNotFoundException("Cannot update other users profile");
+        if (!user.getEmail().equals(authedEmail)) {
+            throw new ResourceNotFoundException("Cannot update other users profile");
         }
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {

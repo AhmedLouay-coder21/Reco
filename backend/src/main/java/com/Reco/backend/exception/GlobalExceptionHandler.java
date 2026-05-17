@@ -175,4 +175,12 @@ public class GlobalExceptionHandler {
                 errorBody(HttpStatus.BAD_REQUEST, "Bad Request", "Malformed JSON body", request),
                 HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(DuplicateProductException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateProduct(
+            DuplicateProductException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                errorBody(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request),
+                HttpStatus.BAD_REQUEST);
+    }
 }

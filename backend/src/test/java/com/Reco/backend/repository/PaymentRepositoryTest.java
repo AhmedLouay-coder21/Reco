@@ -15,12 +15,15 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @ActiveProfiles("test")
 public class PaymentRepositoryTest {
 
-        @Autowired PaymentRepository paymentRepository;
-        @Autowired OrderRepository orderRepository;
-        @Autowired UserRepository userRepository;
+    @Autowired
+    PaymentRepository paymentRepository;
+    @Autowired
+    OrderRepository orderRepository;
+    @Autowired
+    UserRepository userRepository;
 
     @Test
-    void testThatVerifyPaymentBuildAllFields(){
+    void testThatVerifyPaymentBuildAllFields() {
 
         User user = User.builder()
                 .firstName("Youssef")

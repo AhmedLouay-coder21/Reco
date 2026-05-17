@@ -19,15 +19,15 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public CategoryService(CategoryRepository categoryRepository){
+    public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
 
-    public CategoryResponse createCategory(CategoryRequest request){
+    public CategoryResponse createCategory(CategoryRequest request) {
 
-        if(categoryRepository.findByName(request.getName()).isPresent()){
-            throw new DuplicateCategoryException("Category "+ request.getName()+ " already exists");
+        if (categoryRepository.findByName(request.getName()).isPresent()) {
+            throw new DuplicateCategoryException("Category " + request.getName() + " already exists");
         }
 
         Category category = Category.builder()
@@ -36,12 +36,8 @@ public class CategoryService {
                 .build();
         Category saved = categoryRepository.save(category);
 
-        CategoryResponse response = CategoryResponse.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .description(saved.getDescription())
-                .build();
-        return response;
+
+        return toResponse(saved);
     }
 
     private CategoryResponse toResponse(Category category) {
@@ -70,9 +66,9 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        if(!category.getName().equals(request.getName()) &&
-                categoryRepository.findByName(request.getName()).isPresent()){
-            throw new DuplicateCategoryException("Category "+ request.getName() + " already exists");
+        if (!category.getName().equals(request.getName()) &&
+                categoryRepository.findByName(request.getName()).isPresent()) {
+            throw new DuplicateCategoryException("Category " + request.getName() + " already exists");
         }
 
         category.setName(request.getName());
@@ -80,10 +76,10 @@ public class CategoryService {
 
         Category updated = categoryRepository.save(category);
 
-        return  toResponse(updated);
+        return toResponse(updated);
     }
 
-    public  void deleteCategory(Long categoryId) {
+    public void deleteCategory(Long categoryId) {
 
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));

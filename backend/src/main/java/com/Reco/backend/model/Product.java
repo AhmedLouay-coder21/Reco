@@ -6,8 +6,10 @@ import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.time.Instant;
 
 @AllArgsConstructor
@@ -23,9 +25,12 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT", unique = true)
+    @JdbcTypeCode(Types.VARCHAR)
     private String name;
 
+    @Column(columnDefinition = "TEXT")
+    @JdbcTypeCode(Types.VARCHAR)
     private String description;
 
     @Positive
@@ -33,33 +38,40 @@ public class Product {
     private BigDecimal price;
 
     @Min(0)
-    @Column(name = "stock_quantity",nullable = false)
+    @Column(name = "stock_quantity", nullable = false)
     private int stockQuantity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @JdbcTypeCode(Types.VARCHAR)
     private String tags;
 
-    @ColumnDefault("0")
-    @Column(name = "total_clicks",nullable = false)
-    private int totalClicks;
 
+    @Builder.Default
     @ColumnDefault("0")
-    @Column(name = "total_cart_adds",nullable = false)
-    private int totalCartAdds;
+    @Column(name = "total_clicks", nullable = false)
+    private int totalClicks = 0;
 
+
+    @Builder.Default
+    @ColumnDefault("0")
+    @Column(name = "total_cart_adds", nullable = false)
+    private int totalCartAdds = 0;
+
+    @Builder.Default
     @Min(0)
-    @Column(name = "popularity_score",nullable = false)
-    private BigDecimal popularityScore;
+    @Column(name = "popularity_score", nullable = false)
+    private BigDecimal popularityScore = BigDecimal.ZERO;
 
+    @Builder.Default
     @Column(name = "avg_rating")
-    private BigDecimal avgRating;
+    private BigDecimal avgRating = BigDecimal.ZERO;
 
     @CreationTimestamp
-    @Column(name = "created_at",nullable = false)
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @ManyToOne()
-    @JoinColumn(name = "category_id",nullable = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
 }

@@ -87,18 +87,18 @@ public class AuthService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String adminEmail = authentication.getName();
-        User adminRequest = userRepository.findByEmail(adminEmail).orElseThrow(()-> new ResourceNotFoundException("Admin not found"));
+        User adminRequest = userRepository.findByEmail(adminEmail).orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
 
 
-        if (!adminRequest.getRole().equals(Role.ADMIN)){
+        if (!adminRequest.getRole().equals(Role.ADMIN)) {
             throw new AccessDeniedException("Only admins can create admin account");
         }
 
-        if(userRepository.existsByEmail(request.getEmail())){
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException("Email already registered");
         }
 
-        if(userRepository.existsByUsername(request.getUsername())){
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateEmailException("username already taken");
         }
 
