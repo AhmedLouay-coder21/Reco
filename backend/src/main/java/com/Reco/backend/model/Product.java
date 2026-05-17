@@ -7,10 +7,13 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,6 +35,14 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     @JdbcTypeCode(Types.VARCHAR)
     private String description;
+
+    @Column(nullable = false)
+    private String mainImageUrl;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Builder.Default
+    private List<String> additionalImages = new ArrayList<>();
 
     @Positive
     @Column(nullable = false)

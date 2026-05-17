@@ -1,8 +1,10 @@
 package com.Reco.backend.dto.response;
+
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,6 +16,8 @@ public class ProductResponse {
     private Long categoryId;
     private String name;
     private String description;
+    private String mainImageUrl;
+    private List<String> additionalImages;
     private BigDecimal price;
     private int stockQuantity;
     private String tags;
