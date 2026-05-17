@@ -33,6 +33,8 @@ public class ProductService {
                 .categoryId(product.getCategory().getId())
                 .name(product.getName())
                 .description(product.getDescription())
+                .mainImageUrl(product.getMainImageUrl())
+                .additionalImages(product.getAdditionalImages())
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .tags(product.getTags())
@@ -75,6 +77,8 @@ public class ProductService {
                 .name(request.getName())
                 .category(category)
                 .description(request.getDescription())
+                .mainImageUrl(request.getMainImageUrl())
+                .additionalImages(request.getAdditionalImages())
                 .price(request.getPrice())
                 .tags(request.getTags())
                 .stockQuantity(request.getStockQuantity())
@@ -100,6 +104,8 @@ public class ProductService {
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
+        product.setMainImageUrl(request.getMainImageUrl());
+        product.setAdditionalImages(request.getAdditionalImages());
         product.setPrice(request.getPrice());
         product.setCategory(category);
         product.setStockQuantity(request.getStockQuantity());

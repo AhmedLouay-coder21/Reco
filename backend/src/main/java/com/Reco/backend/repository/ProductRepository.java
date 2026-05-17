@@ -18,12 +18,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByNameContainingOrDescriptionContaining(String nameQuery, String descriptionQuery);
 
-    @Query("""
-                  SELECT p FROM Product p WHERE
-                    (p.category.id = :categoryId) AND
-                    (LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%'))
-                    OR LOWER(p.description) LIKE LOWER(CONCAT('%', :q, '%')))
-            """)
+    @Query(value = """
+            SELECT * FROM products p
+            WHERE (:categoryId IS NULL OR p.category_id = :categoryId)
+            AND (:q IS NULL OR p.name ILIKE '%' || CAST(:q AS text) || '%'
+                 OR p.description ILIKE '%' || CAST(:q AS text) || '%')
+            """,
+            countQuery = """
+                    SELECT count(*) FROM products p
+                    WHERE (:categoryId IS NULL OR p.category_id = :categoryId)
+                    AND (:q IS NULL OR p.name ILIKE '%' || CAST(:q AS text) || '%'
+                         OR p.description ILIKE '%' || CAST(:q AS text) || '%')
+                    """,
+            nativeQuery = true)
     Page<Product> searchProducts(@Param("categoryId") Long categoryId,
                                  @Param("q") String q,
                                  Pageable pageable);
