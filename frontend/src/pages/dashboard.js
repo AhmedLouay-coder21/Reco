@@ -221,7 +221,7 @@ function navRouter(panels) {
   });
 
   document.getElementById('dashLogout')?.addEventListener('click', () => {
-    ['auth_token','firstname','lastname','role','user_id'].forEach(k => localStorage.removeItem(k));
+    ['auth_token','firstName','lastName','role','user_id'].forEach(k => localStorage.removeItem(k));
     window.location.href = '/';
   });
 }
@@ -250,7 +250,7 @@ async function loadAdminOverview() {
       api("/categories"),
       api(`/users`),
     ]);
-    const totalProducts = prods.status === 'fulfilled' ? (prods == 'undefined' ? "0" : prods.value.length) : '—' ;
+    const totalProducts = prods.status === 'fulfilled' ? (prods == 'undefined' ? "0" : prods.value.content.length) : '—' ;
     const totalCats     = cats.status  === 'fulfilled' ? (cats == 'undefined' ? "0" : cats.value.length) : '—';
     const totalUsers    = usersData.status === 'fulfilled' ? (usersData == 'undefined' ? "0" : usersData.value.length - 1) : '—';
 
@@ -299,51 +299,6 @@ async function loadRecentOrders() {
     // admin doesn't have a global orders list endpoint in the spec, so we show a placeholder
     el.innerHTML = emptyMarkup('Select Orders panel to manage all orders.');
   } catch { el.innerHTML = emptyMarkup('—'); }
-}
-
-//admin products
-async function loadAdminProducts() {
-  const el = document.getElementById('panel-products');
-  el.innerHTML = loadingMarkup('Materialising');
-  try {
-    const data = await api('/products');
-    el.innerHTML = `
-      <div class="flex items-center justify-between mb-4">
-        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Products (${data.total})</div>
-        <button class="${btnBaseClass} ${btnMdClass}" id="newProductBtn">+ New Product</button>
-      </div>
-      <div class="${tableWrapClass}">
-        <table class="${tableClass}">
-          <thead><tr><th class="${thClass}">ID</th><th class="${thClass}">Name</th><th class="${thClass}">Price</th><th class="${thClass}">Stock</th><th class="${thClass}">Avg Rating</th><th class="${thClass}">Actions</th></tr></thead>
-          <tbody>
-            ${data.products.map(p => `
-              <tr>
-                <td class="${tdClass}">#${p.id}</td>
-                <td class="${tdClass}">${p.name}</td>
-                <td class="${tdClass}">$${p.price}</td>
-                <td class="${tdClass}">${p.stock_quantity}</td>
-                <td class="${tdClass}"><span class="text-secondary text-[0.75rem]">${stars(p.avg_rating)}</span> ${(p.avg_rating||0).toFixed(1)}</td>
-                <td class="${tdClass}">
-                  <button class="${btnBaseClass} ${btnSmClass}" data-edit-product="${p.id}" data-product='${JSON.stringify(p)}'>Edit</button>
-                  <button class="${btnBaseClass} ${btnSmClass} ${btnDangerClass}" data-del-product="${p.id}">Del</button>
-                </td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`;
-
-    document.getElementById('newProductBtn').addEventListener('click', () => openProductModal(null));
-    el.querySelectorAll('[data-edit-product]').forEach(btn => {
-      btn.addEventListener('click', () => openProductModal(JSON.parse(btn.dataset.product)));
-    });
-    el.querySelectorAll('[data-del-product]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Delete product?')) return;
-        try { await api(`/products/${btn.dataset.delProduct}`, { method:'DELETE' }); showAlert('Product deleted'); loadAdminProducts(); }
-        catch(e) { showAlert(e.message, 'error'); }
-      });
-    });
-  } catch(e) { el.innerHTML = emptyMarkup(e.message); }
 }
 
 function openProductModal(product) {
@@ -449,76 +404,19 @@ function openCatModal(cat) {
   });
 }
 
-//admin orders
-async function loadAdminOrders() {
-  const el = document.getElementById('panel-orders');
-  el.innerHTML = loadingMarkup('Loading orders');
-  // The API spec has order status updates (admin) but no global "all orders" GET
-  // We show a search-by-user interface
-  el.innerHTML = `
-    <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Orders</div></div>
-    <div class="flex gap-2.5 mb-5">
-      <input class="${inputClass} max-w-[160px]" id="order-uid" placeholder="User ID">
-      <button class="${btnBaseClass} ${btnMdClass}" id="order-search-btn">Search</button>
-    </div>
-    <div id="orders-result"></div>`;
-
-  document.getElementById('order-search-btn').addEventListener('click', async () => {
-    const uid = document.getElementById('order-uid').value.trim();
-    if (!uid) return;
-    const res = document.getElementById('orders-result');
-    res.innerHTML = loadingMarkup('Loading');
-    try {
-      const data = await api(`/users/${uid}/orders`);
-      if (!data.orders.length) { res.innerHTML = emptyMarkup('No orders found'); return; }
-      res.innerHTML = `
-        <div class="${tableWrapClass}">
-          <table class="${tableClass}">
-            <thead><tr><th class="${thClass}">Order ID</th><th class="${thClass}">Total</th><th class="${thClass}">Status</th><th class="${thClass}">Date</th><th class="${thClass}">Update Status</th></tr></thead>
-            <tbody>
-              ${data.orders.map(o => `
-                <tr>
-                  <td class="${tdClass}">#${o.id}</td>
-                  <td class="${tdClass}">$${o.total_amount}</td>
-                  <td class="${tdClass}">${statusPill(o.status)}</td>
-                  <td class="${tdClass}">${new Date(o.created_at).toLocaleDateString()}</td>
-                  <td class="${tdClass}">
-                    <select class="${selectSmClass} w-auto" data-order-id="${o.id}">
-                      <option>Pending</option><option>Completed</option><option>Cancelled</option>
-                    </select>
-                    <button class="${btnBaseClass} ${btnSmClass}" data-update-order="${o.id}">Set</button>
-                  </td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>`;
-      res.querySelectorAll('[data-update-order]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const sel = res.querySelector(`select[data-order-id="${btn.dataset.updateOrder}"]`);
-          try {
-            await api(`/orders/${btn.dataset.updateOrder}/status`, { method:'PUT', body: JSON.stringify({ status: sel.value }) });
-            showAlert('Order status updated');
-            document.getElementById('order-search-btn').click();
-          } catch(e) { showAlert(e.message, 'error'); }
-        });
-      });
-    } catch(e) { res.innerHTML = emptyMarkup(e.message); }
-  });
-}
-
 //admin users
 async function loadAdminUsers() {
   const el = document.getElementById('panel-users');
   el.innerHTML = loadingMarkup('Loading users');
   try {
-    const data = await api('/users/');
+    const users = await api('/users');
     el.innerHTML = `
-      <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Users (${data.total})</div></div>
+      <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Users (${users.total})</div></div>
       <div class="${tableWrapClass}">
         <table class="${tableClass}">
           <thead><tr><th class="${thClass}">ID</th><th class="${thClass}">Username</th><th class="${thClass}">Email</th><th class="${thClass}">Role</th><th class="${thClass}">Joined</th><th class="${thClass}">Actions</th></tr></thead>
           <tbody>
-            ${data.users.map(u => `
+            ${users.map(u => `
               <tr>
                 <td class="${tdClass}">#${u.id}</td>
                 <td class="${tdClass}">${u.username}</td>
@@ -652,8 +550,7 @@ function renderProductGrid(products, container) {
 
   grid.querySelectorAll('[data-add-cart]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const uid = userId();
-      if (!uid) { showAlert('Please log in with a real account to add to cart', 'error'); return; }
+      if (!isAuthenticated() || !isTokenValid()) { showAlert('Please log in with a real account to add to cart', 'error'); return; }
       try {
         await api(`/users/${uid}/cart/items`, { method:'POST', body: JSON.stringify({ product_id: parseInt(btn.dataset.addCart), quantity: 1 }) });
         showAlert('Added to cart');
@@ -746,8 +643,7 @@ async function openProductDetailModal(productId) {
     });
 
     document.getElementById('modal-add-cart').addEventListener('click', async () => {
-      const uid = userId();
-      if (!uid) { showAlert('Please log in to add to cart', 'error'); return; }
+      if (!isAuthenticated() || !isTokenValid()) { showAlert('Please log in to add to cart', 'error'); return; }
       try {
         await api(`/users/${uid}/cart/items`, { method:'POST', body: JSON.stringify({ product_id: prod.id, quantity: 1 }) });
         showAlert('Added to cart');
@@ -771,11 +667,10 @@ async function openProductDetailModal(productId) {
 async function loadRecs() {
   const el = document.getElementById('panel-recs');
   el.innerHTML = loadingMarkup('Tuning your frequency');
-  const uid = userId();
   try {
     const [personal, popular] = await Promise.allSettled([
-      uid ? api(`/users/${uid}/recommendations10`) : Promise.reject(),
-      api('/recommendations/popular10'),
+      uid ? api(`/users/${uid}/recommendations`) : Promise.reject(),
+      api('/recommendations/popular'),
     ]);
 
     let html = '';
@@ -830,10 +725,9 @@ async function loadRecs() {
 async function loadCart() {
   const el = document.getElementById('panel-cart');
   el.innerHTML = loadingMarkup('Loading cart');
-  const uid = userId();
-  if (!uid) { el.innerHTML = emptyMarkup('Log in to view your cart'); return; }
+  if (!isAuthenticated() || !isTokenValid()) { el.innerHTML = emptyMarkup('Log in to view your cart'); return; }
   try {
-    const data = await api(`/users/${uid}/cart`);
+    const data = await api(`/cart`);
     const items = data.items || [];
     if (!items.length) { el.innerHTML = emptyMarkup('Your cart is empty — browse the Field'); return; }
 
@@ -925,8 +819,7 @@ function openCheckout(uid, total) {
 async function loadCustomerOrders() {
   const el = document.getElementById('panel-orders');
   el.innerHTML = loadingMarkup('Loading orders');
-  const uid = userId();
-  if (!uid) { el.innerHTML = emptyMarkup('Log in to view orders'); return; }
+  if (!isAuthenticated() || !isTokenValid()) { el.innerHTML = emptyMarkup('Log in to view orders'); return; }
   try {
     const data = await api(`/users/${uid}/orders`);
     if (!data.orders.length) { el.innerHTML = emptyMarkup('No orders yet'); return; }
@@ -976,8 +869,7 @@ async function loadCustomerOrders() {
 async function loadMyReviews() {
   const el = document.getElementById('panel-reviews');
   el.innerHTML = loadingMarkup('Loading reviews');
-  const uid = userId();
-  if (!uid) { el.innerHTML = emptyMarkup('Log in to view reviews'); return; }
+  if (!isAuthenticated() || !isTokenValid) { el.innerHTML = emptyMarkup('Log in to view reviews'); return; }
   try {
     const data = await api(`/users/${uid}/reviews`);
     if (!data.reviews.length) { el.innerHTML = emptyMarkup('No reviews yet — browse products and share your transmission'); return; }
@@ -1062,13 +954,15 @@ async function loadMyReviews() {
 async function loadProfile() {
   const el = document.getElementById('panel-profile');
   el.innerHTML = loadingMarkup('Loading profile');
-  const uid = userId();
-  if (!uid) { el.innerHTML = emptyMarkup('Not logged in'); return; }
+  if (!isAuthenticated() || !isTokenValid()) { el.innerHTML = emptyMarkup('Not logged in'); return; }
   try {
-    const user = await api(`/users/${uid}`);
+    const user = await api(`/users/me`);
+    const uid = user.id;
     el.innerHTML = `
       <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">My Profile</div></div>
       <div class="${formClass} max-w-[400px]">
+      <div><label class="${labelClass}">First Name</label><input class="${inputClass}" id="p-firstName" value="${user.firstName}"></div>
+      <div><label class="${labelClass}">Last Name</label><input class="${inputClass}" id="p-lastName" value="${user.lastName}"></div>
         <div><label class="${labelClass}">Username</label><input class="${inputClass}" id="p-username" value="${user.username}"></div>
         <div><label class="${labelClass}">Email</label><input class="${inputClass}" id="p-email" value="${user.email}"></div>
         <div class="text-[0.65rem] text-muted tracking-widest">Member since: ${new Date(user.created_at).toLocaleDateString()}</div>
@@ -1079,7 +973,7 @@ async function loadProfile() {
 
     document.getElementById('save-profile-btn').addEventListener('click', async () => {
       try {
-        await api(`/users/${uid}`, { method:'PUT', body: JSON.stringify({ username: document.getElementById('p-username').value, email: document.getElementById('p-email').value }) });
+        await api(`/users/${uid}`, { method:'PUT', body: JSON.stringify({ firstName: document.getElementById('p-firstName').value, lastName: document.getElementById('p-lastName').value, username: document.getElementById('p-username').value, email: document.getElementById('p-email').value })})
         showAlert('Profile updated');
       } catch(e) { showAlert(e.message, 'error'); }
     });
@@ -1088,9 +982,354 @@ async function loadProfile() {
       if (!confirm('Permanently delete your account and all data?')) return;
       try {
         await api(`/users/${uid}`, { method:'DELETE' });
-        ['auth_token','firstname','lastname','role','user_id'].forEach(k => localStorage.removeItem(k));
+        ['auth_token','firstName','lastName','role','user_id'].forEach(k => localStorage.removeItem(k));
         window.location.href = '/';
       } catch(e) { showAlert(e.message, 'error'); }
+    });
+  } catch(e) { el.innerHTML = emptyMarkup(e.message); }
+}
+// ─── ADMIN ORDERS DASHBOARD ───────────────────────────────────────────────────
+async function loadAdminOrders() {
+  const el = document.getElementById('panel-orders');
+  el.innerHTML = loadingMarkup('Loading orders');
+
+  el.innerHTML = `
+    <div class="mb-6 grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
+      <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60"></div>
+        <div class="absolute top-4 right-4 text-xl opacity-15">▣</div>
+        <div class="font-bebas text-[2.4rem] text-line-bright leading-none" id="od-total">—</div>
+        <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Total Orders</div>
+      </div>
+      <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60"></div>
+        <div class="absolute top-4 right-4 text-xl opacity-15">$</div>
+        <div class="font-bebas text-[2.4rem] text-line-bright leading-none" id="od-revenue">—</div>
+        <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Revenue</div>
+      </div>
+      <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-40"></div>
+        <div class="absolute top-4 right-4 text-xl opacity-15">✓</div>
+        <div class="font-bebas text-[2.4rem] text-emerald-300 leading-none" id="od-completed">—</div>
+        <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Completed</div>
+      </div>
+      <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-40"></div>
+        <div class="absolute top-4 right-4 text-xl opacity-15">◌</div>
+        <div class="font-bebas text-[2.4rem] text-yellow-300 leading-none" id="od-pending">—</div>
+        <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Pending</div>
+      </div>
+      <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400 to-transparent opacity-40"></div>
+        <div class="absolute top-4 right-4 text-xl opacity-15">✕</div>
+        <div class="font-bebas text-[2.4rem] text-red-300 leading-none" id="od-cancelled">—</div>
+        <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Cancelled</div>
+      </div>
+    </div>
+
+    <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="border border-border bg-surface2 p-5">
+        <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">Status Distribution</div>
+        <div id="od-bar-chart" class="flex flex-col gap-2.5"></div>
+      </div>
+      <div class="border border-border bg-surface2 p-5">
+        <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">Revenue by Status</div>
+        <div id="od-rev-chart" class="flex flex-col gap-2.5"></div>
+      </div>
+    </div>
+
+    <div class="border border-border bg-surface2 p-5 mb-5">
+      <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">Search Orders by User</div>
+      <div class="flex gap-2.5">
+        <input class="${inputClass} max-w-[160px]" id="order-uid" placeholder="User ID">
+        <button class="${btnBaseClass} ${btnMdClass}" id="order-search-btn">Search</button>
+      </div>
+    </div>
+    <div id="orders-result"></div>`;
+
+  // wire up search
+  document.getElementById('order-search-btn').addEventListener('click', async () => {
+    const uid = document.getElementById('order-uid').value.trim();
+    if (!uid) return;
+    const res = document.getElementById('orders-result');
+    res.innerHTML = loadingMarkup('Loading');
+    try {
+      const orders = await api(`/orders/${uid}`);
+      if (!orders.length) { res.innerHTML = emptyMarkup('No orders found'); return; }
+
+      // update stat cards from real data
+      const total = orders.length;
+      const completed = orders.filter(o => o.status === 'Completed').length;
+      const pending   = orders.filter(o => o.status === 'Pending').length;
+      const cancelled = orders.filter(o => o.status === 'Cancelled').length;
+      const revenue   = orders.reduce((s, o) => s + parseFloat(o.total_amount || 0), 0);
+
+      document.getElementById('od-total').textContent = total;
+      document.getElementById('od-completed').textContent = completed;
+      document.getElementById('od-pending').textContent = pending;
+      document.getElementById('od-cancelled').textContent = cancelled;
+      document.getElementById('od-revenue').textContent = `$${revenue.toFixed(0)}`;
+
+      // status bar chart
+      const statuses = [
+        { label: 'Completed', count: completed, color: 'bg-emerald-400', text: 'text-emerald-300' },
+        { label: 'Pending',   count: pending,   color: 'bg-yellow-400',  text: 'text-yellow-300' },
+        { label: 'Cancelled', count: cancelled, color: 'bg-red-400',     text: 'text-red-300' },
+      ];
+      document.getElementById('od-bar-chart').innerHTML = statuses.map(s => `
+        <div>
+          <div class="flex justify-between mb-1">
+            <span class="text-[0.62rem] tracking-[0.15em] uppercase text-muted">${s.label}</span>
+            <span class="text-[0.62rem] tracking-[0.12em] ${s.text}">${s.count} · ${total ? ((s.count/total)*100).toFixed(0) : 0}%</span>
+          </div>
+          <div class="h-[5px] bg-border/30 border border-border/40 overflow-hidden">
+            <div class="h-full ${s.color} opacity-70 transition-all duration-700" style="width:${total ? (s.count/total*100).toFixed(1) : 0}%"></div>
+          </div>
+        </div>`).join('');
+
+      // revenue by status bar chart
+      const revByStatus = [
+        { label: 'Completed', val: orders.filter(o=>o.status==='Completed').reduce((s,o)=>s+parseFloat(o.total_amount||0),0), color: 'bg-secondary', text: 'text-line-bright' },
+        { label: 'Pending',   val: orders.filter(o=>o.status==='Pending').reduce((s,o)=>s+parseFloat(o.total_amount||0),0),   color: 'bg-yellow-400',  text: 'text-yellow-300' },
+        { label: 'Cancelled', val: orders.filter(o=>o.status==='Cancelled').reduce((s,o)=>s+parseFloat(o.total_amount||0),0), color: 'bg-red-400',     text: 'text-red-300' },
+      ];
+      const maxRev = Math.max(...revByStatus.map(r => r.val), 1);
+      document.getElementById('od-rev-chart').innerHTML = revByStatus.map(r => `
+        <div>
+          <div class="flex justify-between mb-1">
+            <span class="text-[0.62rem] tracking-[0.15em] uppercase text-muted">${r.label}</span>
+            <span class="text-[0.62rem] tracking-[0.12em] ${r.text}">$${r.val.toFixed(0)}</span>
+          </div>
+          <div class="h-[5px] bg-border/30 border border-border/40 overflow-hidden">
+            <div class="h-full ${r.color} opacity-70 transition-all duration-700" style="width:${(r.val/maxRev*100).toFixed(1)}%"></div>
+          </div>
+        </div>`).join('');
+
+      // orders table
+      res.innerHTML = `
+        <div class="${tableWrapClass}">
+          <table class="${tableClass}">
+            <thead>
+              <tr>
+                <th class="${thClass}">Order ID</th>
+                <th class="${thClass}">Total</th>
+                <th class="${thClass}">Status</th>
+                <th class="${thClass}">Date</th>
+                <th class="${thClass}">Update Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orders.map(o => `
+                <tr>
+                  <td class="${tdClass} font-bebas text-[0.9rem] tracking-[0.1em] text-line-bright">#${o.id}</td>
+                  <td class="${tdClass} text-emerald-300">$${o.total_amount}</td>
+                  <td class="${tdClass}">${statusPill(o.status)}</td>
+                  <td class="${tdClass} text-muted">${new Date(o.created_at).toLocaleDateString()}</td>
+                  <td class="${tdClass}">
+                    <div class="flex items-center gap-2">
+                      <select class="${selectSmClass} w-auto" data-order-id="${o.id}">
+                        <option ${o.status==='Pending'   ? 'selected' : ''}>Pending</option>
+                        <option ${o.status==='Completed' ? 'selected' : ''}>Completed</option>
+                        <option ${o.status==='Cancelled' ? 'selected' : ''}>Cancelled</option>
+                      </select>
+                      <button class="${btnBaseClass} ${btnSmClass}" data-update-order="${o.id}">Set</button>
+                    </div>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+
+      res.querySelectorAll('[data-update-order]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const sel = res.querySelector(`select[data-order-id="${btn.dataset.updateOrder}"]`);
+          try {
+            await api(`/orders/${btn.dataset.updateOrder}/status`, { method: 'PUT', body: JSON.stringify({ status: sel.value }) });
+            showAlert('Order status updated');
+            document.getElementById('order-search-btn').click();
+          } catch(e) { showAlert(e.message, 'error'); }
+        });
+      });
+    } catch(e) { res.innerHTML = emptyMarkup(e.message); }
+  });
+}
+
+
+// ─── ADMIN PRODUCTS DASHBOARD ─────────────────────────────────────────────────
+async function loadAdminProducts() {
+  const el = document.getElementById('panel-products');
+  el.innerHTML = loadingMarkup('Materialising');
+  try {
+    const products = await api('/products');
+    const list = products.content || [];
+    const totalProducts = products.totalElements ?? list.length;
+
+    // compute analytics
+    const avgPrice     = list.length ? list.reduce((s, p) => s + parseFloat(p.price || 0), 0) / list.length : 0;
+    const lowStock     = list.filter(p => (p.stockQuantity ?? 0) < 5).length;
+    const topClicked   = [...list].sort((a, b) => (b.totalClicks || 0) - (a.totalClicks || 0)).slice(0, 5);
+    const topCartAdds  = [...list].sort((a, b) => (b.totalCartAdds || 0) - (a.totalCartAdds || 0)).slice(0, 5);
+    const maxClicks    = topClicked[0]?.totalClicks || 1;
+    const maxCartAdds  = topCartAdds[0]?.totalCartAdds || 1;
+
+    // category breakdown
+    const catCounts = list.reduce((acc, p) => {
+      const key = p.categoryId || 'Uncategorised';
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    const catEntries = Object.entries(catCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const maxCat = catEntries[0]?.[1] || 1;
+
+    el.innerHTML = `
+      <div class="flex items-center justify-between mb-5">
+        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Products (${totalProducts})</div>
+        <button class="${btnBaseClass} ${btnMdClass}" id="newProductBtn">+ New Product</button>
+      </div>
+
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 mb-6">
+        <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+          <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60"></div>
+          <div class="absolute top-4 right-4 text-xl opacity-15">⬡</div>
+          <div class="font-bebas text-[2.4rem] text-line-bright leading-none">${totalProducts}</div>
+          <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Total Products</div>
+        </div>
+        <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+          <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60"></div>
+          <div class="absolute top-4 right-4 text-xl opacity-15">$</div>
+          <div class="font-bebas text-[2.4rem] text-line-bright leading-none">$${avgPrice.toFixed(0)}</div>
+          <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Avg Price</div>
+        </div>
+        <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+          <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400 to-transparent opacity-40"></div>
+          <div class="absolute top-4 right-4 text-xl opacity-15">⚠</div>
+          <div class="font-bebas text-[2.4rem] ${lowStock > 0 ? 'text-red-300' : 'text-emerald-300'} leading-none">${lowStock}</div>
+          <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Low Stock (&lt;5)</div>
+        </div>
+        <div class="relative overflow-hidden border border-border bg-surface2 p-5">
+          <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60"></div>
+          <div class="absolute top-4 right-4 text-xl opacity-15">◈</div>
+          <div class="font-bebas text-[2.4rem] text-line-bright leading-none">${catEntries.length}</div>
+          <div class="text-[0.62rem] tracking-[0.2em] uppercase text-muted mt-1">Categories</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div class="border border-border bg-surface2 p-5">
+          <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">Top Clicked</div>
+          <div class="flex flex-col gap-2.5">
+            ${topClicked.map((p, i) => `
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-[0.62rem] tracking-[0.12em] uppercase text-muted truncate max-w-[140px]">${p.name}</span>
+                  <span class="text-[0.62rem] text-line-bright ml-2 shrink-0">${p.totalClicks || 0}</span>
+                </div>
+                <div class="h-[4px] bg-border/30 border border-border/40 overflow-hidden">
+                  <div class="h-full bg-secondary opacity-70 transition-all duration-700" style="width:${((p.totalClicks||0)/maxClicks*100).toFixed(1)}%"></div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="border border-border bg-surface2 p-5">
+          <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">Top Cart Adds</div>
+          <div class="flex flex-col gap-2.5">
+            ${topCartAdds.map((p, i) => `
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-[0.62rem] tracking-[0.12em] uppercase text-muted truncate max-w-[140px]">${p.name}</span>
+                  <span class="text-[0.62rem] text-emerald-300 ml-2 shrink-0">${p.totalCartAdds || 0}</span>
+                </div>
+                <div class="h-[4px] bg-border/30 border border-border/40 overflow-hidden">
+                  <div class="h-full bg-emerald-400 opacity-60 transition-all duration-700" style="width:${((p.totalCartAdds||0)/maxCartAdds*100).toFixed(1)}%"></div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="border border-border bg-surface2 p-5">
+          <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">By Category ID</div>
+          <div class="flex flex-col gap-2.5">
+            ${catEntries.map(([cat, count]) => `
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-[0.62rem] tracking-[0.12em] uppercase text-muted">Cat #${cat}</span>
+                  <span class="text-[0.62rem] text-line-bright">${count}</span>
+                </div>
+                <div class="h-[4px] bg-border/30 border border-border/40 overflow-hidden">
+                  <div class="h-full bg-violet-400 opacity-60 transition-all duration-700" style="width:${(count/maxCat*100).toFixed(1)}%"></div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      ${lowStock > 0 ? `
+        <div class="border border-red-400/30 bg-red-500/5 px-4 py-3 mb-5 flex items-center gap-3">
+          <span class="text-red-300 text-[0.9rem]">⚠</span>
+          <span class="text-[0.68rem] tracking-[0.15em] uppercase text-red-300">
+            ${lowStock} product${lowStock > 1 ? 's' : ''} with low stock — review inventory below
+          </span>
+        </div>` : ''}
+
+      <div class="${tableWrapClass}">
+        <table class="${tableClass}">
+          <thead>
+            <tr>
+              <th class="${thClass}">ID</th>
+              <th class="${thClass}">Name</th>
+              <th class="${thClass}">Cat</th>
+              <th class="${thClass}">Price</th>
+              <th class="${thClass}">Stock</th>
+              <th class="${thClass}">Rating</th>
+              <th class="${thClass}">Clicks</th>
+              <th class="${thClass}">Cart Adds</th>
+              <th class="${thClass}">Pop. Score</th>
+              <th class="${thClass}">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map(p => {
+              const stockClass = (p.stockQuantity ?? 0) < 5
+                ? 'text-red-300 font-semibold'
+                : (p.stockQuantity ?? 0) < 15 ? 'text-yellow-300' : 'text-emerald-300';
+              return `
+              <tr>
+                <td class="${tdClass} font-bebas text-[0.85rem] tracking-[0.1em] text-line-bright">#${p.id}</td>
+                <td class="${tdClass}">${p.name}</td>
+                <td class="${tdClass} text-muted">#${p.categoryId}</td>
+                <td class="${tdClass} text-line-bright">$${p.price}</td>
+                <td class="${tdClass} ${stockClass}">${p.stockQuantity ?? '—'}</td>
+                <td class="${tdClass}">
+                  <span class="text-secondary text-[0.72rem]">${stars(p.avgRating)}</span>
+                  <span class="text-muted text-[0.65rem] ml-1">${(p.avgRating||0).toFixed(1)}</span>
+                </td>
+                <td class="${tdClass}">${p.totalClicks ?? 0}</td>
+                <td class="${tdClass}">${p.totalCartAdds ?? 0}</td>
+                <td class="${tdClass}">
+                  <span class="font-bebas text-[0.9rem] text-secondary">${(p.popularityScore||0).toFixed(1)}</span>
+                </td>
+                <td class="${tdClass}">
+                  <div class="flex gap-1.5">
+                    <button class="${btnBaseClass} ${btnSmClass}" data-edit-product="${p.id}" data-product='${JSON.stringify(p)}'>Edit</button>
+                    <button class="${btnBaseClass} ${btnSmClass} ${btnDangerClass}" data-del-product="${p.id}">Del</button>
+                  </div>
+                </td>
+              </tr>`}).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+    document.getElementById('newProductBtn').addEventListener('click', () => openProductModal(null));
+    el.querySelectorAll('[data-edit-product]').forEach(btn => {
+      btn.addEventListener('click', () => openProductModal(JSON.parse(btn.dataset.product)));
+    });
+    el.querySelectorAll('[data-del-product]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete product?')) return;
+        try { await api(`/products/${btn.dataset.delProduct}`, { method: 'DELETE' }); showAlert('Product deleted'); loadAdminProducts(); }
+        catch(e) { showAlert(e.message, 'error'); }
+      });
     });
   } catch(e) { el.innerHTML = emptyMarkup(e.message); }
 }

@@ -1,4 +1,4 @@
-import { login } from '../api/auth.js';
+import { login, register } from '../api/auth.js';
 let diagonalLineDir = 0;
 let textPos = 0;
 let titlePos = 0;
@@ -176,6 +176,12 @@ function GenerateSignUpForm()
         <form id="signupForm" m-20>
             <div id = "entryFields" class=" m-10 flex flex-col w-[150%]">
                 <div class="mb-6">
+                    <input type="text" id="firstName" class="bg-neutral-secondary-medium border border-(--color-secondary) border-default-medium rounded-lg h-15 text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body" placeholder="Firstname" required />
+                </div>
+                <div class="mb-6">
+                    <input type="text" id="lastName" class="bg-neutral-secondary-medium border border-(--color-secondary) border-default-medium rounded-lg h-15 text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body" placeholder="Lastname" required />
+                </div>
+                <div class="mb-6">
                     <input type="text" id="username" class="bg-neutral-secondary-medium border border-(--color-secondary) border-default-medium rounded-lg h-15 text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body" placeholder="Username" required />
                 </div>
                 <div class="mb-6">
@@ -215,10 +221,14 @@ function setupSignupValidation(loginBox1)
     signupForm.addEventListener("submit", handleSignupSubmit);
 }
 
-function handleSignupSubmit(e) 
+async function handleSignupSubmit(e) 
 {
     e.preventDefault();
 
+    const firstName = document.querySelector("#firstName").value;
+    const lastName = document.querySelector("#lastName").value;
+    const username = document.querySelector("#username").value;
+    const email = document.querySelector("#email").value;
     const password =
         document.querySelector("#password").value;
 
@@ -232,6 +242,8 @@ function handleSignupSubmit(e)
         return;
     }
 
+    console.log(await register({firstName, lastName, username, email, password}));
+    window.location.href = '/';
     alert("Account created successfully!");
 }
 
@@ -249,7 +261,6 @@ function validatePassword(password, passwordCheck) {
             message: "Password must be at least 8 characters."
         };
     }
-
     return {
         valid: true,
         message: ""

@@ -12,12 +12,26 @@ export const login = async (creds) => {
         throw new Error(data.message || "Invalid credentials");
     }
     localStorage.setItem("auth_token", data.accessToken);
-    localStorage.setItem("firstname", data.firstname);
-    localStorage.setItem("lastname", data.lastname);
+    localStorage.setItem("firstName", data.firstName);
+    localStorage.setItem("lastName", data.lastName);
     localStorage.setItem("role", data.role);
     return data;
 };
 
+export const register = async (creds) => {
+    const res = await fetch(`${BASE}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(creds)
+    });
+    const data = await res.json();
+    localStorage.setItem("id", data.id);
+    localStorage.setItem("auth_token", data.accessToken);
+    localStorage.setItem("firstName", data.firstName);
+    localStorage.setItem("lastName", data.lastName);
+    localStorage.setItem("role", data.role);
+    return data;
+};
 // Generic API wrapper for authenticated requests
 export async function api(path, opts = {}) {
     const token = localStorage.getItem("auth_token");
@@ -37,7 +51,7 @@ export async function api(path, opts = {}) {
     // this line is commented because for this moment some parts of the backend isnt completed yet
     // and it throws 401 or 403 statues code which leads to cookies deletion 
     // if (res.status === 401 || res.status === 403) {
-    //     ['auth_token','firstname','lastname','role','user_id'].forEach(k => localStorage.removeItem(k));
+    //     ['auth_token','firstName','lastName','role','user_id'].forEach(k => localStorage.removeItem(k));
     //     throw new Error(data?.message || `${res.status} ${res.statusText}`);
     // }
 
@@ -55,7 +69,7 @@ export function isAuthenticated()
 
 export function getUserFirstName() 
 {
-    return localStorage.getItem("firstname") || "User"; 
+    return localStorage.getItem("firstName") || "User"; 
 }
 export function getUserRole()
 {
@@ -90,7 +104,7 @@ export function isTokenValid() {
     if (!payload) return false;
 
     if (payload.exp && Date.now() >= payload.exp * 1000) {
-        ['auth_token', 'firstname', 'lastname', 'role', 'user_id'].forEach(k => localStorage.removeItem(k));
+        ['auth_token', 'firstName', 'lastName', 'role', 'user_id'].forEach(k => localStorage.removeItem(k));
         return false;
     }
 
