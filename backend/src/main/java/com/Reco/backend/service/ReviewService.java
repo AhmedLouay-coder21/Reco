@@ -13,6 +13,8 @@ import com.Reco.backend.model.User;
 import com.Reco.backend.repository.ProductRepository;
 import com.Reco.backend.repository.ReviewRepository;
 import com.Reco.backend.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,7 +52,7 @@ public class ReviewService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if(reviewRepository.findByUserAndProduct(user,product).isPresent()){
+        if (reviewRepository.findByUserAndProduct(user, product).isPresent()) {
             throw new DuplicateReviewException("You have already reviewed this product");
         }
 
@@ -66,14 +70,11 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewsByProduct(Long productId) {
+    public Page<ReviewResponse> getReviewsByProduct(Long productId, Pageable pageable) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-
-        return reviewRepository.findByProduct(product)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return reviewRepository.findByProduct(product, pageable)
+                .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -130,11 +131,14 @@ public class ReviewService {
     public AverageRatingResponse getAverageRating(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-
         Double avg = reviewRepository.avgRatingByProduct(product).orElse(0.0);
         Long total = reviewRepository.countByProduct(product);
-
-        return new AverageRatingResponse(productId, avg, total);
+        Map<Integer, Long> distribution = new HashMap<>();
+        for (int i = 1; i <= 5; i++) distribution.put(i, 0L);
+        for (Object[] row : reviewRepository.countByRatingGrouped(product)) {
+            distribution.put(((Number) row[0]).intValue(), (Long) row[1]);
+        }
+        return new AverageRatingResponse(productId, avg, total, distribution);
     }
 
     private void updateProductAverageRating(Product product) {

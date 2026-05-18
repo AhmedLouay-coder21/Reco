@@ -15,4 +15,8 @@ public interface RecommendationCacheRepository extends JpaRepository<Recommendat
 
     List<RecommendationCache> findAllByExpiresAtBefore(Instant expiresAtBefore);
 
+    void deleteByUser(User user);
+
+    void deleteAll();
+
 }

@@ -6,8 +6,11 @@ import com.Reco.backend.dto.response.AverageRatingResponse;
 import com.Reco.backend.dto.response.ReviewResponse;
 import com.Reco.backend.service.ReviewService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +34,15 @@ public class ReviewController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ReviewResponse>> getReviewsByProduct(@PathVariable Long productId) {
-        return ResponseEntity.ok(reviewService.getReviewsByProduct(productId));
+    public ResponseEntity<Page<ReviewResponse>> getReviewsByProduct(
+            @PathVariable Long productId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "desc") String order
+    ) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(Sort.Direction.fromString(order), sort));
+        return ResponseEntity.ok(reviewService.getReviewsByProduct(productId, pageable));
     }
 
     @GetMapping("/user/{userId}")

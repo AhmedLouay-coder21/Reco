@@ -74,6 +74,7 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .accessToken(jwtToken)
+                .userId(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())

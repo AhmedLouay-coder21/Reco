@@ -91,12 +91,7 @@ public class OrderService {
 
         orderItemRepository.saveAll(orderItems);
         cartItemRepository.deleteAll(cartItems);
-
-        for (CartItem item : cartItems) {
-            Product product = item.getProduct();
-            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
-            productRepository.save(product);
-        }
+        
 
         return toResponse(savedOrder, orderItems);
     }
@@ -110,22 +105,22 @@ public class OrderService {
         return toResponse(order);
     }
 
-        @Transactional(readOnly = true)
-        public List<OrderResponse> getOrdersByUser() {
-                return getOrdersByUser(null);
-        }
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrdersByUser() {
+        return getOrdersByUser(null);
+    }
 
-        @Transactional(readOnly = true)
-        public List<OrderResponse> getOrdersByUser(OrderStatus status) {
-                User user = getCurrentUser();
-                List<Order> orders = (status == null)
-                                ? orderRepository.findAllByUser(user)
-                                : orderRepository.findByUserAndStatus(user, status);
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrdersByUser(OrderStatus status) {
+        User user = getCurrentUser();
+        List<Order> orders = (status == null)
+                ? orderRepository.findAllByUser(user)
+                : orderRepository.findByUserAndStatus(user, status);
 
-                return orders.stream()
-                                .map(this::toResponse)
-                                .collect(Collectors.toList());
-        }
+        return orders.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
     public List<OrderResponse> getAllOrders() {
@@ -137,7 +132,7 @@ public class OrderService {
 
     private void verifyOrderOwnership(Order order) {
         User user = getCurrentUser();
-        if (!order.getUser().getId().equals(user.getId()) && ! user.getRole().equals(Role.ADMIN)) {
+        if (!order.getUser().getId().equals(user.getId()) && !user.getRole().equals(Role.ADMIN)) {
             throw new ResourceNotFoundException("Order not found");
         }
     }

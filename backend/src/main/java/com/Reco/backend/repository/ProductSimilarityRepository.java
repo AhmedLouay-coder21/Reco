@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface ProductSimilarityRepository extends JpaRepository<ProductSimilarity, Long> {
 
-     List<ProductSimilarity> findAllBySource(Product source);
+    List<ProductSimilarity> findAllBySourceIn(List<Product> sources);
 }
