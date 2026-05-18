@@ -23,15 +23,18 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final MockPaymentGateway mockPaymentGateway;
+    private final NotificationService notificationService;
 
     public PaymentService(PaymentRepository paymentRepository,
                           OrderRepository orderRepository,
                           UserRepository userRepository,
-                          MockPaymentGateway mockPaymentGateway) {
+                          MockPaymentGateway mockPaymentGateway,
+                          NotificationService notificationService) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.mockPaymentGateway = mockPaymentGateway;
+        this.notificationService = notificationService;
     }
 
     public PaymentResponse processPayment(Long orderId, PaymentProcessRequest request) {
@@ -69,7 +72,10 @@ public class PaymentService {
 
         if (status == PaymentStatus.SUCCESS) {
             order.setStatus(OrderStatus.COMPLETED);
-            orderRepository.save(order);
+            Order updated = orderRepository.save(order);
+            notificationService.notifyOrderStatusChange(updated, OrderStatus.COMPLETED);
+        } else {
+            notificationService.notifyPaymentFailed(order);
         }
 
         return toResponse(saved);

@@ -32,6 +32,7 @@ public class OrderService {
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
+    private final NotificationService notificationService;
 
 
     public OrderResponse createOrder() {
@@ -82,6 +83,7 @@ public class OrderService {
         orderItemRepository.saveAll(orderItems);
         cartItemRepository.deleteAll(cartItems);
 
+        notificationService.notifyOrderStatusChange(savedOrder, OrderStatus.PENDING);
 
         return toResponse(savedOrder, orderItems);
     }
@@ -130,8 +132,14 @@ public class OrderService {
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        OrderStatus previousStatus = order.getStatus();
         order.setStatus(status);
         Order updated = orderRepository.save(order);
+
+        if (previousStatus != status) {
+            notificationService.notifyOrderStatusChange(updated, status);
+        }
+
         return toResponse(updated);
     }
 
@@ -207,10 +215,13 @@ public class OrderService {
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void autoCompleteOrders() {
-
         List<Order> pending = orderRepository.findByStatusAndCreatedAtBefore(
-                OrderStatus.PENDING, Instant.now()
-                        .minus(2, ChronoUnit.MINUTES));
-        pending.forEach(o -> o.setStatus(OrderStatus.COMPLETED));
+                OrderStatus.PENDING, Instant.now().minus(2, ChronoUnit.MINUTES));
+
+        for (Order order : pending) {
+            order.setStatus(OrderStatus.COMPLETED);
+            Order updated = orderRepository.save(order);
+            notificationService.notifyOrderStatusChange(updated, OrderStatus.COMPLETED);
+        }
     }
 }
