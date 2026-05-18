@@ -7,16 +7,21 @@ import com.Reco.backend.exception.InsufficientStockException;
 import com.Reco.backend.exception.ResourceNotFoundException;
 import com.Reco.backend.model.*;
 import com.Reco.backend.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -26,27 +31,12 @@ public class OrderService {
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
+    private final CartService cartService;
 
-    public OrderService(OrderRepository orderRepository,
-                        OrderItemRepository orderItemRepository,
-                        CartRepository cartRepository,
-                        CartItemRepository cartItemRepository,
-                        UserRepository userRepository,
-                        PaymentRepository paymentRepository,
-                        ProductRepository productRepository) {
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.userRepository = userRepository;
-        this.paymentRepository = paymentRepository;
-        this.productRepository = productRepository;
-    }
 
     public OrderResponse createOrder() {
         User user = getCurrentUser();
-        Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+        Cart cart = cartService.getOrCreateCart(user);
         List<CartItem> cartItems = cartItemRepository.findByCart(cart);
 
         if (cartItems.isEmpty()) {
@@ -91,7 +81,7 @@ public class OrderService {
 
         orderItemRepository.saveAll(orderItems);
         cartItemRepository.deleteAll(cartItems);
-        
+
 
         return toResponse(savedOrder, orderItems);
     }
@@ -212,5 +202,15 @@ public class OrderService {
                 item.getPriceAtPurchase(),
                 lineTotal
         );
+    }
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void autoCompleteOrders() {
+
+        List<Order> pending = orderRepository.findByStatusAndCreatedAtBefore(
+                OrderStatus.PENDING, Instant.now()
+                        .minus(2, ChronoUnit.MINUTES));
+        pending.forEach(o -> o.setStatus(OrderStatus.COMPLETED));
     }
 }

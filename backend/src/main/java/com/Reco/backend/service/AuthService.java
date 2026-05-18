@@ -6,8 +6,10 @@ import com.Reco.backend.dto.request.RegisterRequest;
 import com.Reco.backend.dto.response.AuthResponse;
 import com.Reco.backend.exception.DuplicateEmailException;
 import com.Reco.backend.exception.ResourceNotFoundException;
+import com.Reco.backend.model.Cart;
 import com.Reco.backend.model.Role;
 import com.Reco.backend.model.User;
+import com.Reco.backend.repository.CartRepository;
 import com.Reco.backend.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final CartRepository cartRepository;
 
     public AuthResponse register(RegisterRequest request) {
 
@@ -49,6 +52,7 @@ public class AuthService {
                 .role(Role.CUSTOMER)
                 .build();
         userRepository.save(user);
+        cartRepository.save(Cart.builder().user(user).build());
 
         return getAuthResponse(user);
     }

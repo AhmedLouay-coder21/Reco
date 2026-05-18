@@ -13,6 +13,8 @@
 | `/api/v1/products/**` | GET | ✅ Public |
 | `/api/v1/categories/**` | GET | ✅ Public |
 | `/api/v1/reviews/product/**` | GET | ✅ Public |
+| `/api/v1/recommendations/popular` | GET | ✅ Public |
+| `/api/v1/recommendations/products/**` | GET | ✅ Public |
 | Everything else | ALL | 🔒 Authenticated (valid JWT) |
 
 **CORS:** All origins, methods `GET POST PUT DELETE PATCH OPTIONS`, all headers, no credentials  
@@ -32,6 +34,8 @@ Authorization: Bearer <accessToken>
 
 ### POST `/api/v1/auth/register`
 Create a new customer account.
+
+**Controller:** `AuthController.java`
 
 **Public**
 
@@ -63,6 +67,8 @@ Create a new customer account.
 ### POST `/api/v1/auth/login`
 Authenticate and receive a JWT.
 
+**Controller:** `AuthController.java`
+
 **Public**
 
 **Request:**
@@ -80,6 +86,8 @@ Authenticate and receive a JWT.
 ### POST `/api/v1/auth/register-admin`
 Create a new admin account.
 
+**Controller:** `AuthController.java`
+
 **🔒 ADMIN only**
 
 **Request:** Same structure as register.
@@ -95,6 +103,8 @@ Create a new admin account.
 ### GET `/api/v1/products`
 List/paginate/search products.
 
+**Controller:** `ProductController.java`
+
 **✅ Public (GET)**
 
 **Query Params:**
@@ -105,7 +115,7 @@ List/paginate/search products.
 | `limit` | int | `20` | Items per page |
 | `categoryId` | Long | — | Filter by category |
 | `q` | String | — | Search term (matches name and description) |
-| `sort` | String | `name` | Sort field |
+| `sort` | String | `name` | Sort field: `name`, `price`, `createdAt`, `popularityScore`, `avgRating`, `toprated` |
 | `order` | String | `asc` | Sort direction (`asc` / `desc`) |
 
 **Response** `200 OK`:
@@ -139,6 +149,8 @@ List/paginate/search products.
 ### GET `/api/v1/products/{productId}`
 Get a single product by ID.
 
+**Controller:** `ProductController.java`
+
 **✅ Public (GET)**
 
 **Response** `200 OK` — single `ProductResponse` object.
@@ -147,6 +159,8 @@ Get a single product by ID.
 
 ### POST `/api/v1/products`
 Create a new product.
+
+**Controller:** `ProductController.java`
 
 **🔒 ADMIN only**
 
@@ -169,6 +183,8 @@ Create a new product.
 ### PUT `/api/v1/products/{productId}`
 Fully update a product.
 
+**Controller:** `ProductController.java`
+
 **🔒 ADMIN only**
 
 **Request:** Same as POST.
@@ -179,6 +195,8 @@ Fully update a product.
 
 ### DELETE `/api/v1/products/{productId}`
 Delete a product.
+
+**Controller:** `ProductController.java`
 
 **🔒 ADMIN only**
 
@@ -192,6 +210,8 @@ Delete a product.
 
 ### GET `/api/v1/categories`
 List all categories.
+
+**Controller:** `CategoryController.java`
 
 **✅ Public (GET)**
 
@@ -211,12 +231,16 @@ List all categories.
 ### GET `/api/v1/categories/{categoryId}`
 Get a single category.
 
+**Controller:** `CategoryController.java`
+
 **✅ Public (GET)**
 
 ---
 
 ### POST `/api/v1/categories`
 Create a category.
+
+**Controller:** `CategoryController.java`
 
 **🔒 ADMIN only**
 
@@ -235,6 +259,8 @@ Create a category.
 ### PUT `/api/v1/categories/{categoryId}`
 Update a category.
 
+**Controller:** `CategoryController.java`
+
 **🔒 ADMIN only**
 
 **Request:**
@@ -252,6 +278,8 @@ Update a category.
 ### DELETE `/api/v1/categories/{categoryId}`
 Delete a category.
 
+**Controller:** `CategoryController.java`
+
 **🔒 ADMIN only**
 
 **Response** `204 No Content`.
@@ -264,6 +292,8 @@ Delete a category.
 
 ### GET `/api/v1/users/me`
 Get the currently authenticated user's profile.
+
+**Controller:** `UserController.java`
 
 **🔒 Authenticated**
 
@@ -285,6 +315,8 @@ Get the currently authenticated user's profile.
 ### GET `/api/v1/users/{userId}`
 Get a user by ID.
 
+**Controller:** `UserController.java`
+
 **🔒 Authenticated**
 
 **Response** `200 OK`.
@@ -294,6 +326,8 @@ Get a user by ID.
 ### GET `/api/v1/users`
 List all users.
 
+**Controller:** `UserController.java`
+
 **🔒 ADMIN only**
 
 **Response** `200 OK` — array of `UserResponse`.
@@ -302,6 +336,8 @@ List all users.
 
 ### PUT `/api/v1/users/{userId}`
 Update user profile.
+
+**Controller:** `UserController.java`
 
 **🔒 Authenticated** (owner or admin)
 
@@ -323,6 +359,8 @@ Update user profile.
 ### PATCH `/api/v1/users/{userId}/password`
 Update user password.
 
+**Controller:** `UserController.java`
+
 **🔒 Authenticated** (owner)
 
 **Request:**
@@ -341,6 +379,8 @@ Update user password.
 ### DELETE `/api/v1/users/{userId}`
 Delete a user account.
 
+**Controller:** `UserController.java`
+
 **🔒 Authenticated** (owner or admin)
 
 **Response** `204 No Content`.
@@ -353,6 +393,8 @@ Delete a user account.
 
 ### GET `/api/v1/cart`
 Get the current user's cart.
+
+**Controller:** `CartController.java`
 
 **🔒 CUSTOMER only**
 
@@ -380,6 +422,8 @@ Get the current user's cart.
 ### POST `/api/v1/cart/items`
 Add a product to cart.
 
+**Controller:** `CartController.java`
+
 **🔒 CUSTOMER only**
 
 **Request:**
@@ -397,6 +441,8 @@ Add a product to cart.
 ### PUT `/api/v1/cart/items/{productId}`
 Update item quantity.
 
+**Controller:** `CartController.java`
+
 **🔒 CUSTOMER only**
 
 **Request:**
@@ -413,6 +459,8 @@ Update item quantity.
 ### DELETE `/api/v1/cart/items/{productId}`
 Remove an item from cart.
 
+**Controller:** `CartController.java`
+
 **🔒 CUSTOMER only**
 
 **Response** `204 No Content`.
@@ -421,6 +469,8 @@ Remove an item from cart.
 
 ### DELETE `/api/v1/cart/clear`
 Clear the entire cart.
+
+**Controller:** `CartController.java`
 
 **🔒 CUSTOMER only**
 
@@ -434,6 +484,8 @@ Clear the entire cart.
 
 ### POST `/api/v1/orders`
 Create an order from the current user's cart.
+
+**Controller:** `OrderController.java`
 
 **🔒 CUSTOMER only**
 
@@ -462,6 +514,8 @@ Create an order from the current user's cart.
 ### GET `/api/v1/orders`
 List current user's orders.
 
+**Controller:** `OrderController.java`
+
 **🔒 CUSTOMER only**
 
 **Query Params:**
@@ -477,6 +531,8 @@ List current user's orders.
 ### GET `/api/v1/orders/{orderId}`
 Get a specific order.
 
+**Controller:** `OrderController.java`
+
 **🔒 Authenticated** (owner or admin)
 
 **Response** `200 OK`.
@@ -486,6 +542,8 @@ Get a specific order.
 ### GET `/api/v1/orders/{orderId}/items`
 Get line items for an order.
 
+**Controller:** `OrderController.java`
+
 **🔒 Authenticated** (owner or admin)
 
 **Response** `200 OK` — array of `OrderItemResponse`.
@@ -494,6 +552,8 @@ Get line items for an order.
 
 ### PUT `/api/v1/orders/{orderId}/status`
 Update order status.
+
+**Controller:** `OrderController.java`
 
 **🔒 ADMIN only**
 
@@ -511,6 +571,8 @@ Update order status.
 ### DELETE `/api/v1/orders/{orderId}`
 Delete an order.
 
+**Controller:** `OrderController.java`
+
 **🔒 ADMIN only**
 
 **Response** `204 No Content`.
@@ -523,6 +585,8 @@ Delete an order.
 
 ### POST `/api/v1/orders/{orderId}/payment`
 Process payment for an order.
+
+**Controller:** `PaymentController.java`
 
 **🔒 CUSTOMER only**
 
@@ -552,6 +616,8 @@ Process payment for an order.
 ### GET `/api/v1/orders/{orderId}/payment`
 Get payment for an order.
 
+**Controller:** `PaymentController.java`
+
 **🔒 Authenticated** (owner or admin)
 
 **Response** `200 OK`.
@@ -560,6 +626,8 @@ Get payment for an order.
 
 ### GET `/api/v1/payments/{paymentId}`
 Get a payment by its ID.
+
+**Controller:** `PaymentController.java`
 
 **🔒 Authenticated** (owner or admin)
 
@@ -573,6 +641,8 @@ Get a payment by its ID.
 
 ### POST `/api/v1/reviews`
 Create a product review.
+
+**Controller:** `ReviewController.java`
 
 **🔒 CUSTOMER only** (one review per product per user)
 
@@ -602,16 +672,29 @@ Create a product review.
 ---
 
 ### GET `/api/v1/reviews/product/{productId}`
-Get all reviews for a product.
+Get paginated reviews for a product.
+
+**Controller:** `ReviewController.java`
 
 **✅ Public (GET)**
 
-**Response** `200 OK` — array of `ReviewResponse`.
+**Query Params:**
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `page` | int | `0` | Page number (zero-indexed) |
+| `limit` | int | `20` | Items per page |
+| `sort` | String | `createdAt` | Sort field (`createdAt`, `rating`) |
+| `order` | String | `desc` | Sort direction (`asc` / `desc`) |
+
+**Response** `200 OK` — paginated `Page<ReviewResponse>`.
 
 ---
 
 ### GET `/api/v1/reviews/product/{productId}/average`
 Get average rating for a product.
+
+**Controller:** `ReviewController.java`
 
 **✅ Public (GET)**
 
@@ -620,7 +703,14 @@ Get average rating for a product.
 {
   "productId": 1,
   "averageRating": 4.2,
-  "totalReviews": 15
+  "totalReviews": 15,
+  "ratingDistribution": {
+    "1": 1,
+    "2": 0,
+    "3": 2,
+    "4": 5,
+    "5": 7
+  }
 }
 ```
 
@@ -628,6 +718,8 @@ Get average rating for a product.
 
 ### GET `/api/v1/reviews/user/{userId}`
 Get reviews by a specific user.
+
+**Controller:** `ReviewController.java`
 
 **🔒 Authenticated**
 
@@ -637,6 +729,8 @@ Get reviews by a specific user.
 
 ### PUT `/api/v1/reviews/{reviewId}`
 Update own review.
+
+**Controller:** `ReviewController.java`
 
 **🔒 CUSTOMER only** (owner check in service)
 
@@ -655,9 +749,178 @@ Update own review.
 ### DELETE `/api/v1/reviews/{reviewId}`
 Delete own review.
 
+**Controller:** `ReviewController.java`
+
 **🔒 CUSTOMER only** (owner check in service)
 
 **Response** `204 No Content`.
+
+---
+
+## Recommendation Module
+
+**Base:** `/api/v1/recommendations`
+
+### GET `/api/v1/recommendations/popular`
+Get trending/popular products (top 10 by popularity score).
+
+**Controller:** `RecommendationController.java`
+
+**✅ Public (GET)**
+
+**Response** `200 OK`:
+```json
+{
+  "trendingProducts": [
+    {
+      "productId": 1,
+      "name": "Wireless Mouse",
+      "price": 29.99,
+      "avgRating": 4.2,
+      "recommendationScore": 85.5
+    }
+  ],
+  "totalCount": 10
+}
+```
+
+---
+
+### GET `/api/v1/recommendations/products/{productId}/frequently-bought-together`
+Get products frequently bought together with the given product.
+
+**Controller:** `RecommendationController.java`
+
+**✅ Public (GET)**
+
+**Query Params:**
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `limit` | int | `5` | Max results to return |
+
+**Response** `200 OK`:
+```json
+{
+  "productId": 1,
+  "frequentlyBoughtTogether": [
+    {
+      "productId": 2,
+      "name": "Keyboard",
+      "price": 49.99,
+      "frequency": 42,
+      "purchaseCount": 100,
+      "avgRating": 4.5
+    }
+  ]
+}
+```
+
+---
+
+### GET `/api/v1/recommendations/cache`
+List all cached recommendation entries.
+
+**Controller:** `RecommendationController.java`
+
+**🔒 ADMIN only**
+
+**Response** `200 OK`:
+```json
+{
+  "cacheEntries": [
+    {
+      "id": 1,
+      "userId": 1,
+      "productId": 1,
+      "recommendationScore": 85.5,
+      "expiresAt": "2026-05-18T01:00:00Z"
+    }
+  ],
+  "totalCount": 50
+}
+```
+
+---
+
+### POST `/api/v1/recommendations/refresh`
+Refresh the entire recommendation cache.
+
+**Controller:** `RecommendationController.java`
+
+**🔒 ADMIN only**
+
+**Response** `200 OK`:
+```json
+{
+  "usersRefreshed": 10,
+  "cacheEntriesCreated": 100
+}
+```
+
+---
+
+### DELETE `/api/v1/recommendations/cache/{cacheId}`
+Delete a single cache entry.
+
+**Controller:** `RecommendationController.java`
+
+**🔒 ADMIN only**
+
+**Response** `204 No Content`.
+
+---
+
+### POST `/api/v1/users/{userId}/interactions`
+Track a user interaction (click or cart-add).
+
+**Controller:** `UserController.java`
+
+**🔒 Authenticated**
+
+**Request:**
+```json
+{
+  "productId": 1,
+  "actionType": "CLICK"
+}
+```
+
+`actionType` values: `CLICK`, `CART_ADD`
+
+**Response** `200 OK`.
+
+---
+
+### GET `/api/v1/users/{userId}/recommendations`
+Get personalized recommendations for a user.
+
+**Controller:** `UserController.java`
+
+**🔒 Authenticated**
+
+Uses Strategy pattern:
+- No signals → ColdStartStrategy (top popular)
+- Reviews only → ContentBasedStrategy (similarity from high-rated reviews)
+- Interactions only → CollaborativeStrategy (similar users' products)
+- Both reviews and interactions → merge (0.6 content-based + 0.4 collaborative)
+- Falls back to ColdStart if selected strategy returns empty
+
+**Response** `200 OK`:
+```json
+{
+  "recommendations": [
+    {
+      "productId": 1,
+      "name": "Wireless Mouse",
+      "price": 29.99,
+      "avgRating": 4.2,
+      "recommendationScore": 85.5
+    }
+  ],
+  "totalCount": 10
+}
+```
 
 ---
 

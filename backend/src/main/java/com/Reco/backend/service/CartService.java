@@ -43,8 +43,7 @@ public class CartService {
     @Transactional(readOnly = true)
     public CartResponse getCart() {
         User user = getCurrentUser();
-        Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+        Cart cart = getOrCreateCart(user);
 
         return toResponse(cart);
     }
@@ -95,11 +94,11 @@ public class CartService {
         CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
 
-        if(product.getStockQuantity() == 0){
+        if (product.getStockQuantity() == 0) {
             throw new ResourceNotFoundException("Out of stock");
         }
 
-        if(request.getQuantity() > product.getStockQuantity()){
+        if (request.getQuantity() > product.getStockQuantity()) {
             throw new ResourceNotFoundException("no enough stock");
         }
 
@@ -144,7 +143,7 @@ public class CartService {
         productRepository.save(product);
     }
 
-    private Cart getOrCreateCart(User user) {
+    public Cart getOrCreateCart(User user) {
         return cartRepository.findByUser(user)
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).build()));
     }
