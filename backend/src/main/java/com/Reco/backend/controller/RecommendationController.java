@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/recommendations")
 @RequiredArgsConstructor
@@ -19,6 +21,13 @@ public class RecommendationController {
     @GetMapping("/popular")
     public ResponseEntity<TrendingListResponse> getTrending() {
         return ResponseEntity.ok(recommendationService.getTrending());
+    }
+
+    @GetMapping("/products/{productId}/frequently-bought-together")
+    public ResponseEntity<Map<String, Object>> getFrequentlyBought(
+            @PathVariable Long productId,
+            @RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(recommendationService.getFrequentlyBoughtTogether(productId, limit));
     }
 
     @GetMapping("/cache")
@@ -39,5 +48,5 @@ public class RecommendationController {
         recommendationService.deleteCacheEntry(cacheId);
         return ResponseEntity.noContent().build();
     }
-    
+
 }

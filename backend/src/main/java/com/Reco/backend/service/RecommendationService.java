@@ -5,7 +5,8 @@ import com.Reco.backend.dto.request.InteractionRequest;
 import com.Reco.backend.dto.response.*;
 import com.Reco.backend.exception.ResourceNotFoundException;
 import com.Reco.backend.model.*;
-import com.Reco.backend.recommendation.*;
+import com.Reco.backend.recommendation.RecommendationStrategy;
+import com.Reco.backend.recommendation.RecommendationStrategyFactory;
 import com.Reco.backend.repository.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class RecommendationService {
     private final RecommendationCacheRepository recommendationCacheRepository;
     private final ReviewRepository reviewRepository;
     private final RecommendationStrategyFactory strategyFactory;
+    private final OrderItemRepository orderItemRepository;
 
     public void trackInteraction(Long userId, @Valid InteractionRequest request) {
 
@@ -78,7 +80,6 @@ public class RecommendationService {
 
     }
 
-    @Transactional(readOnly = true)
     public RecommendationListResponse getPersonalized(Long userId) {
 
         User user = userRepository.findById(userId)
@@ -114,6 +115,9 @@ public class RecommendationService {
             List<RecommendationItemResponse> content = strategyFactory.contentBased().recommend(user, 10);
             List<RecommendationItemResponse> collab = strategyFactory.collaborative().recommend(user, 10);
             items = mergeRanked(content, collab, 10);
+            if (items.isEmpty()) {
+                items = strategyFactory.coldStart().recommend(user, 10);
+            }
         } else {
             RecommendationStrategy strategy = strategyFactory.select(hasReviews, hasInteractions);
             items = strategy.recommend(user, 10);
@@ -160,11 +164,17 @@ public class RecommendationService {
                 .map(e -> {
                     RecommendationItemResponse found = null;
                     for (RecommendationItemResponse r : content) {
-                        if (r.getProductId().equals(e.getKey())) { found = r; break; }
+                        if (r.getProductId().equals(e.getKey())) {
+                            found = r;
+                            break;
+                        }
                     }
                     if (found == null) {
                         for (RecommendationItemResponse r : collab) {
-                            if (r.getProductId().equals(e.getKey())) { found = r; break; }
+                            if (r.getProductId().equals(e.getKey())) {
+                                found = r;
+                                break;
+                            }
                         }
                     }
                     if (found == null) return null;
@@ -263,6 +273,30 @@ public class RecommendationService {
                 .usersRefreshed(users.size())
                 .cacheEntriesCreated(entriesCreated)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getFrequentlyBoughtTogether(Long productId, int limit) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        List<Object[]> rows = orderItemRepository.findFrequentlyBoughtTogether(productId, limit);
+        List<FrequentlyBoughtTogetherResponse> items = new ArrayList<>();
+        for (Object[] row : rows) {
+            Long relatedId = ((Number) row[0]).longValue();
+            long frequency = ((Number) row[1]).longValue();
+            long purchaseCount = ((Number) row[2]).longValue();
+            Product related = productRepository.findById(relatedId).orElse(null);
+            if (related == null) continue;
+            items.add(FrequentlyBoughtTogetherResponse.builder()
+                    .productId(related.getId())
+                    .name(related.getName())
+                    .price(related.getPrice())
+                    .frequency(frequency)
+                    .purchaseCount(purchaseCount)
+                    .avgRating(related.getAvgRating())
+                    .build());
+        }
+        return Map.of("productId", productId, "frequentlyBoughtTogether", items);
     }
 
 
