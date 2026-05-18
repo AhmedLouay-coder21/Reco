@@ -23,4 +23,10 @@ public interface UserInteractionRepository extends JpaRepository<UserInteraction
     @Query("SELECT DISTINCT u.user FROM UserInteraction u")
     List<User> findDistinctUsers();
 
+    @Query("SELECT DISTINCT ui.user.id FROM UserInteraction ui WHERE ui.product.id IN :productIds")
+    List<Long> findDistinctUserIdsByProductIds(@Param("productIds") List<Long> productIds);
+
+    @Query("SELECT DISTINCT ui.product.id FROM UserInteraction ui WHERE ui.user.id IN :userIds")
+    List<Long> findDistinctProductIdsByUserIds(@Param("userIds") List<Long> userIds);
+
 }
