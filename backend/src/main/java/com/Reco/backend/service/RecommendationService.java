@@ -5,6 +5,7 @@ import com.Reco.backend.dto.request.InteractionRequest;
 import com.Reco.backend.dto.response.*;
 import com.Reco.backend.exception.ResourceNotFoundException;
 import com.Reco.backend.model.*;
+import com.Reco.backend.recommendation.*;
 import com.Reco.backend.repository.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class RecommendationService {
     private final ProductSimilarityRepository productSimilarityRepository;
     private final RecommendationCacheRepository recommendationCacheRepository;
     private final ReviewRepository reviewRepository;
+    private final RecommendationStrategyFactory strategyFactory;
 
     public void trackInteraction(Long userId, @Valid InteractionRequest request) {
 
@@ -101,59 +103,81 @@ public class RecommendationService {
             return new RecommendationListResponse(items, items.size());
         }
 
-        List<Long> productIds = userInteractionRepository.findDistinctProductIdsByUserId(userId);
-        if (productIds.isEmpty()) {
-            return new RecommendationListResponse(List.of(), 0);
+        List<Long> reviewed = reviewRepository.findDistinctProductIdsByUserIdAndRatingGreaterThanEqual(userId, 4);
+        List<Long> interacted = userInteractionRepository.findDistinctProductIdsByUserId(userId);
+
+        boolean hasReviews = !reviewed.isEmpty();
+        boolean hasInteractions = !interacted.isEmpty();
+
+        List<RecommendationItemResponse> items;
+        if (hasReviews && hasInteractions) {
+            List<RecommendationItemResponse> content = strategyFactory.contentBased().recommend(user, 10);
+            List<RecommendationItemResponse> collab = strategyFactory.collaborative().recommend(user, 10);
+            items = mergeRanked(content, collab, 10);
+        } else {
+            RecommendationStrategy strategy = strategyFactory.select(hasReviews, hasInteractions);
+            items = strategy.recommend(user, 10);
+            if (items.isEmpty()) {
+                items = strategyFactory.coldStart().recommend(user, 10);
+            }
         }
-
-        List<Product> interacted = productRepository.findAllById(productIds);
-
-        List<ProductSimilarity> similarities = productSimilarityRepository.
-                findAllBySourceIn(interacted);
-
-        Set<Long> interactedIds = new HashSet<>(productIds);
-        Map<Long, Double> candidateScores = new HashMap<>();
-        for (ProductSimilarity sim : similarities) {
-            Product candidate = sim.getSimilar();
-            if (interactedIds.contains(candidate.getId())) continue;
-            double score = sim.getSimilarityScore().doubleValue()
-                    * candidate.getPopularityScore().doubleValue();
-            candidateScores.merge(candidate.getId(), score, Double::sum);
-        }
-
-        List<Long> topIds = candidateScores.entrySet().stream()
-                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
-                .limit(10)
-                .map(Map.Entry::getKey)
-                .toList();
-
-        List<Product> topProducts = productRepository.findAllById(topIds);
-        Map<Long, Product> productMap = topProducts.stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
 
         recommendationCacheRepository.deleteByUser(user);
 
-        List<RecommendationItemResponse> items = new ArrayList<>();
-        for (Long id : topIds) {
-            Product p = productMap.get(id);
+        for (RecommendationItemResponse item : items) {
+            Product p = productRepository.findById(item.getProductId()).orElse(null);
             if (p == null) continue;
-            double score = candidateScores.get(id);
             recommendationCacheRepository.save(RecommendationCache.builder()
                     .user(user)
                     .product(p)
-                    .recommendationScore(BigDecimal.valueOf(score))
+                    .recommendationScore(BigDecimal.valueOf(item.getRecommendationScore()))
                     .expiresAt(Instant.now().plusSeconds(3600))
-                    .build());
-            items.add(RecommendationItemResponse.builder()
-                    .productId(p.getId())
-                    .name(p.getName())
-                    .price(p.getPrice())
-                    .avgRating(p.getAvgRating())
-                    .recommendationScore(score)
                     .build());
         }
         return new RecommendationListResponse(items, items.size());
 
+    }
+
+    private List<RecommendationItemResponse> mergeRanked(
+            List<RecommendationItemResponse> content,
+            List<RecommendationItemResponse> collab,
+            int limit) {
+
+        double maxContent = content.stream().mapToDouble(RecommendationItemResponse::getRecommendationScore).max().orElse(1);
+        double maxCollab = collab.stream().mapToDouble(RecommendationItemResponse::getRecommendationScore).max().orElse(1);
+
+        Map<Long, Double> merged = new HashMap<>();
+        for (RecommendationItemResponse item : content) {
+            merged.put(item.getProductId(), 0.6 * (item.getRecommendationScore() / maxContent));
+        }
+        for (RecommendationItemResponse item : collab) {
+            merged.merge(item.getProductId(), 0.4 * (item.getRecommendationScore() / maxCollab), Double::sum);
+        }
+
+        return merged.entrySet().stream()
+                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+                .limit(limit)
+                .map(e -> {
+                    RecommendationItemResponse found = null;
+                    for (RecommendationItemResponse r : content) {
+                        if (r.getProductId().equals(e.getKey())) { found = r; break; }
+                    }
+                    if (found == null) {
+                        for (RecommendationItemResponse r : collab) {
+                            if (r.getProductId().equals(e.getKey())) { found = r; break; }
+                        }
+                    }
+                    if (found == null) return null;
+                    return RecommendationItemResponse.builder()
+                            .productId(found.getProductId())
+                            .name(found.getName())
+                            .price(found.getPrice())
+                            .avgRating(found.getAvgRating())
+                            .recommendationScore(e.getValue())
+                            .build();
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Transactional(readOnly = true)

@@ -36,7 +36,7 @@ public class ProductController {
     ) {
 
         Pageable pageable = PageRequest.of(page, limit,
-                Sort.by(Sort.Direction.fromString(order), sort));
+                Sort.by(Sort.Direction.fromString(order), mapSort(sort)));
 
         return ResponseEntity.ok(productService.listProducts(categoryId, q, pageable));
     }
@@ -68,6 +68,16 @@ public class ProductController {
         productService.deleteProduct(productId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    private String mapSort(String sort) {
+        return switch (sort) {
+            case "popularityScore", "popularity_score" -> "popularity_score";
+            case "avgRating", "avg_rating", "toprated" -> "avg_rating";
+            case "price" -> "price";
+            case "createdAt", "created_at" -> "created_at";
+            default -> "name";
+        };
     }
 
 

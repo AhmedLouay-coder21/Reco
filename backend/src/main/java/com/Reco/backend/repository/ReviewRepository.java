@@ -32,4 +32,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r.rating, COUNT(r) FROM Review r WHERE r.product = :product GROUP BY r.rating")
     List<Object[]> countByRatingGrouped(@Param("product") Product product);
 
+    @Query("SELECT DISTINCT r.product.id FROM Review r WHERE r.user.id = :userId AND r.rating >= :minRating")
+    List<Long> findDistinctProductIdsByUserIdAndRatingGreaterThanEqual(@Param("userId") Long userId,
+                                                                       @Param("minRating") int minRating);
+
 }
