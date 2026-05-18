@@ -10,8 +10,6 @@ import com.Reco.backend.gateway.MockPaymentGateway;
 import com.Reco.backend.model.*;
 import com.Reco.backend.repository.OrderRepository;
 import com.Reco.backend.repository.PaymentRepository;
-import com.Reco.backend.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,18 +19,18 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
+    private final User currentUser;
     private final MockPaymentGateway mockPaymentGateway;
     private final NotificationService notificationService;
 
     public PaymentService(PaymentRepository paymentRepository,
                           OrderRepository orderRepository,
-                          UserRepository userRepository,
+                          User currentUser,
                           MockPaymentGateway mockPaymentGateway,
                           NotificationService notificationService) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
-        this.userRepository = userRepository;
+        this.currentUser = currentUser;
         this.mockPaymentGateway = mockPaymentGateway;
         this.notificationService = notificationService;
     }
@@ -106,18 +104,10 @@ public class PaymentService {
     }
 
     private void verifyOrderOwnership(Order order) {
-        User user = getCurrentUser();
+        User user = currentUser;
         if (!order.getUser().getId().equals(user.getId()) && ! user.getRole().equals(Role.ADMIN)) {
             throw new ResourceNotFoundException("Order not found");
         }
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     private PaymentResponse toResponse(Payment payment) {

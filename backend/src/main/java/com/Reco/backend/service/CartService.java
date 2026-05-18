@@ -12,8 +12,6 @@ import com.Reco.backend.model.User;
 import com.Reco.backend.repository.CartItemRepository;
 import com.Reco.backend.repository.CartRepository;
 import com.Reco.backend.repository.ProductRepository;
-import com.Reco.backend.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,28 +26,27 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final User currentUser;
 
     public CartService(CartRepository cartRepository,
                        CartItemRepository cartItemRepository,
                        ProductRepository productRepository,
-                       UserRepository userRepository) {
+                       User currentUser) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
-        this.userRepository = userRepository;
+        this.currentUser = currentUser;
     }
 
     @Transactional(readOnly = true)
     public CartResponse getCart() {
-        User user = getCurrentUser();
-        Cart cart = getOrCreateCart(user);
+        Cart cart = getOrCreateCart(currentUser);
 
         return toResponse(cart);
     }
 
     public CartResponse addItem(CartItemAddRequest request) {
-        User user = getCurrentUser();
+        User user = currentUser;
         Cart cart = getOrCreateCart(user);
 
         Product product = productRepository.findById(request.getProductId())
@@ -86,7 +83,7 @@ public class CartService {
     }
 
     public CartResponse updateItem(Long productId, CartItemUpdateRequest request) {
-        User user = getCurrentUser();
+        User user = currentUser;
         Cart cart = getOrCreateCart(user);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -110,7 +107,7 @@ public class CartService {
     }
 
     public CartResponse removeItem(Long productId) {
-        User user = getCurrentUser();
+        User user = currentUser;
         Cart cart = getOrCreateCart(user);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -125,7 +122,7 @@ public class CartService {
     }
 
     public CartResponse clearCart() {
-        User user = getCurrentUser();
+        User user = currentUser;
         Cart cart = getOrCreateCart(user);
         List<CartItem> items = cartItemRepository.findByCart(cart);
         cartItemRepository.deleteAll(items);
@@ -146,14 +143,6 @@ public class CartService {
     public Cart getOrCreateCart(User user) {
         return cartRepository.findByUser(user)
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).build()));
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     private CartResponse toResponse(Cart cart) {

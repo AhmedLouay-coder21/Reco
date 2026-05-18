@@ -4,8 +4,6 @@ import com.Reco.backend.dto.response.NotificationResponse;
 import com.Reco.backend.exception.ResourceNotFoundException;
 import com.Reco.backend.model.*;
 import com.Reco.backend.repository.NotificationRepository;
-import com.Reco.backend.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +15,12 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
+    private final User currentUser;
 
     public NotificationService(NotificationRepository notificationRepository,
-                               UserRepository userRepository) {
+                               User currentUser) {
         this.notificationRepository = notificationRepository;
-        this.userRepository = userRepository;
+        this.currentUser = currentUser;
     }
 
     public void notifyOrderStatusChange(Order order, OrderStatus status) {
@@ -41,7 +39,7 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public List<NotificationResponse> getMyNotifications(boolean unreadOnly) {
-        User user = getCurrentUser();
+        User user = currentUser;
         List<Notification> notifications = unreadOnly
                 ? notificationRepository.findByUserAndReadFalseOrderByCreatedAtDesc(user)
                 : notificationRepository.findByUserOrderByCreatedAtDesc(user);
@@ -53,7 +51,7 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public long getUnreadCount() {
-        return notificationRepository.countByUserAndReadFalse(getCurrentUser());
+        return notificationRepository.countByUserAndReadFalse(currentUser);
     }
 
     public NotificationResponse markAsRead(Long notificationId) {
@@ -63,7 +61,7 @@ public class NotificationService {
     }
 
     public void markAllAsRead() {
-        User user = getCurrentUser();
+        User user = currentUser;
         notificationRepository.findByUserAndReadFalseOrderByCreatedAtDesc(user)
                 .forEach(notification -> notification.setRead(true));
     }
@@ -72,7 +70,7 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
 
-        User user = getCurrentUser();
+        User user = currentUser;
         if (!notification.getUser().getId().equals(user.getId())) {
             throw new ResourceNotFoundException("Notification not found");
         }
@@ -91,14 +89,6 @@ public class NotificationService {
                 .build();
 
         notificationRepository.save(notification);
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     private NotificationResponse toResponse(Notification notification) {

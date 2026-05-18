@@ -9,7 +9,6 @@ import com.Reco.backend.model.*;
 import com.Reco.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final UserRepository userRepository;
+    private final User currentUser;
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
@@ -36,7 +35,7 @@ public class OrderService {
 
 
     public OrderResponse createOrder() {
-        User user = getCurrentUser();
+        User user = currentUser;
         Cart cart = cartService.getOrCreateCart(user);
         List<CartItem> cartItems = cartItemRepository.findByCart(cart);
 
@@ -104,7 +103,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByUser(OrderStatus status) {
-        User user = getCurrentUser();
+        User user = currentUser;
         List<Order> orders = (status == null)
                 ? orderRepository.findAllByUser(user)
                 : orderRepository.findByUserAndStatus(user, status);
@@ -123,7 +122,7 @@ public class OrderService {
     }
 
     private void verifyOrderOwnership(Order order) {
-        User user = getCurrentUser();
+        User user = currentUser;
         if (!order.getUser().getId().equals(user.getId()) && !user.getRole().equals(Role.ADMIN)) {
             throw new ResourceNotFoundException("Order not found");
         }
@@ -168,14 +167,6 @@ public class OrderService {
     private BigDecimal cartLineTotal(CartItem item) {
         return item.getProduct().getPrice()
                 .multiply(BigDecimal.valueOf(item.getQuantity()));
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     private OrderResponse toResponse(Order order) {
