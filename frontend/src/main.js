@@ -9,10 +9,22 @@ import { Login } from './pages/login.js'
 import { HomeView } from './pages/home.js'
 import { getUserRole, isAuthenticated, getUserFirstName } from './api/auth.js'
 import { DashboardView } from './pages/dashboard.js'
+import { ProductsView } from './pages/products.js'
 
-
+if (window.location.pathname === '/products') {
+  ProductsView()
+}
+ else {
+  GenerateMain()
+}
 export function GenerateMain()
 {
+  document.querySelectorAll('a[href="/products"]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault()
+    ProductsView()
+  })
+})
   document.getElementById('nav-slot').innerHTML = Nav(NAV_LINKS)
   document.getElementById('footer-slot').innerHTML = Footer(FOOTER_LINKS)
   

@@ -445,17 +445,17 @@ async function loadAdminCache() {
   const el = document.getElementById('panel-cache');
   el.innerHTML = loadingMarkup('Scanning cache');
   try {
-    const data = await api('/recommendations/cache');
+    const cache = await api('/recommendations/cache');
     el.innerHTML = `
       <div class="flex items-center justify-between mb-4">
-        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Recommendation Cache (${data.total})</div>
+        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Recommendation Cache (${cache.total})</div>
         <button class="${btnBaseClass} ${btnMdClass} ${btnSuccessClass}" id="refreshAllBtn">↺ Refresh All</button>
       </div>
       <div class="${tableWrapClass}">
         <table class="${tableClass}">
           <thead><tr><th class="${thClass}">Cache ID</th><th class="${thClass}">User ID</th><th class="${thClass}">Products</th><th class="${thClass}">Cached At</th><th class="${thClass}">Expires</th><th class="${thClass}">Actions</th></tr></thead>
           <tbody>
-            ${data.cache_entries.map(c => `
+            ${cache.cacheEntries.map(c => `
               <tr>
                 <td class="${tdClass}">#${c.cache_id}</td>
                 <td class="${tdClass}">${c.user_id}</td>

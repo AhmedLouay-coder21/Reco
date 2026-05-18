@@ -1,6 +1,6 @@
 // this file should contain data only
 export const NAV_LINKS = [
-  { href: '#products', label: 'Objects' },
+  { href: '/products', label: 'Browse' },
   { href: '#about',    label: 'Ritual'  },
   { href: '#testi',    label: 'Voices'  },
   { href: '#newsletter', label: 'Channel' },

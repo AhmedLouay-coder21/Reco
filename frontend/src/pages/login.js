@@ -242,7 +242,7 @@ async function handleSignupSubmit(e)
         return;
     }
 
-    console.log(await register({firstName, lastName, username, email, password}));
+    await register({firstName, lastName, username, email, password});
     window.location.href = '/';
     alert("Account created successfully!");
 }
