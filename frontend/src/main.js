@@ -10,11 +10,25 @@ import { HomeView } from './pages/home.js'
 import { getUserRole, isAuthenticated, getUserFirstName } from './api/auth.js'
 import { DashboardView } from './pages/dashboard.js'
 import { ProductsView } from './pages/products.js'
+import { ProductView } from './pages/product.js'
+import { PaymentView } from './pages/payment.js'
 
-if (window.location.pathname === '/products') {
-  ProductsView()
-}
- else {
+route()
+
+function route() {
+  const path = window.location.pathname
+  if (path === '/products') {
+    ProductsView()
+    return
+  }
+  if (path === '/product') {
+    ProductView()
+    return
+  }
+  if (path === '/payment') {
+    PaymentView()
+    return
+  }
   GenerateMain()
 }
 export function GenerateMain()
@@ -117,4 +131,3 @@ for (let i = 0; i < 40; i++) {
   frag.appendChild(s)
 }
 starsEl.appendChild(frag)
-GenerateMain();

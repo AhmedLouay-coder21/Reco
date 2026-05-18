@@ -65,7 +65,7 @@ export function Login()
     title.style.left = "48px";
     title.style.top = "84px";
     title.innerHTML = `<h1 id="textTitle" class="hero-title font-bebas text-[clamp(4rem,14vw,12rem)] mb-4 hero-anim-2">
-        <span class="glow-word">THE</span><br>FIELD
+        <span class="glow-word">RECO</span><br>
         </h1>
         `;
     

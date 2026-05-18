@@ -32,7 +32,7 @@ export function Nav(links, currentPath = '/' , Login) {
 
   return `
     <nav class="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 py-4 lg:px-14 bg-main/70 backdrop-blur-lg border-b border-border">
-      <a href="/" class="logo font-bebas text-3xl tracking-[0.15em] text-line-bright relative drop-shadow-[0_0_20px_var(--color-line-bright)] text-title">THE FIELD</a>
+      <a href="/" class="logo font-bebas text-3xl tracking-[0.15em] text-line-bright relative drop-shadow-[0_0_20px_var(--color-line-bright)] text-title">RECO</a>
       <ul class="nav-links hidden md:flex gap-10">${linkItems}</ul>
       <div class="nav-right flex items-center gap-4">
         <button id="loginBtn" class="cart-btn group flex items-center gap-2 px-5 py-2 border border-secondary/50 rounded-sm text-[0.72rem] font-semibold tracking-widest uppercase text-line-bright transition-all hover:bg-secondary/10 hover:shadow-[0_0_20px_var(--color-pulse-glow1)]">
@@ -177,7 +177,7 @@ export function Footer(links) {
   return `
     <footer class="border-t border-border px-6 lg:px-20 py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
       <div>
-        <a href="/" class="font-bebas text-4xl tracking-widest text-line-bright drop-shadow-[0_0_20px_var(--color-pulse-glow2)] mb-4 block">THE FIELD</a>
+        <a href="/" class="font-bebas text-4xl tracking-widest text-line-bright drop-shadow-[0_0_20px_var(--color-pulse-glow2)] mb-4 block">RECO</a>
         <p class="text-[0.78rem] font-light tracking-widest text-muted leading-relaxed max-w-[260px] mb-6">Objects channeled from the space between thought and form. Transmitting from the main since 2021.</p>
         <div class="flex gap-2">
           <a href="#" class="w-9 h-9 border border-border flex items-center justify-center text-muted hover:border-secondary hover:text-line-bright transition-all">𝕏</a>
@@ -188,7 +188,7 @@ export function Footer(links) {
       ${columns}
     </footer>
     <div class="border-t border-border px-6 lg:px-20 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[0.65rem] tracking-widest uppercase text-muted relative z-10">
-      <span>© 2026 The Field Studio. All frequencies reserved.</span>
+      <span>© RECO. All frequencies reserved.</span>
       <div class="flex gap-6"><span>Privacy</span><span>Terms</span><span>Signal Policy</span></div>
     </div>`
 }

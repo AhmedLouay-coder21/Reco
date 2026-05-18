@@ -94,7 +94,7 @@ function productsShell() {
         <!-- search -->
         <div class="relative group">
           <input id="search-input" type="text" value="${state.q}"
-            placeholder="Search the field…"
+            placeholder="Search RECO…"
             class="products-search w-full md:w-[320px] bg-surface border border-border text-[0.8rem] text-(--color-white) placeholder:text-muted px-4 py-3 pr-12 font-josefin outline-none
                    focus:border-secondary focus:shadow-[0_0_20px_rgba(155,89,247,.2)] transition-all" />
           <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-secondary transition-colors">⌕</span>
@@ -301,7 +301,7 @@ function renderProducts() {
       addToCart(product);
     });
 
-    card.querySelector('.card-click-area')?.addEventListener('click', () => openDetail(product));
+    card.querySelector('.card-click-area')?.addEventListener('click', () => goToProduct(id));
   });
 
   // scroll reveal
@@ -361,7 +361,7 @@ function emptyState() {
   return `
     <div class="text-center py-28 border border-border col-span-4">
       <div class="font-bebas text-7xl text-border mb-4">⬡</div>
-      <div class="font-bebas text-3xl text-muted tracking-widest mb-2">Nothing In The Field</div>
+      <div class="font-bebas text-3xl text-muted tracking-widest mb-2">Nothing In RECO</div>
       <p class="text-[0.72rem] tracking-[0.2em] uppercase text-muted">Try a different filter or search</p>
     </div>`;
 }
@@ -456,6 +456,11 @@ function productListRow(p) {
       <!-- left accent -->
       <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-secondary to-transparent scale-y-0 group-hover:scale-y-100 transition-transform duration-500 pointer-events-none"></div>
     </div>`;
+}
+
+function goToProduct(id) {
+  if (!id) return;
+  window.location.href = `/product?id=${id}`;
 }
 
 function openDetail(product) {
@@ -581,7 +586,11 @@ async function addToCart(product) {
     quantity: 1,
   };
 
+  const users = await api('/users/me');
+  console.log(users);
+  const userId = users.id;
   try {
+    api(`/users/${userId}/interactions`, { method:'POST', body: JSON.stringify({ productId: product.id, interactionType: 'CART_ADD' }) }).catch(()=>{});
     const cartResponse = await api('/cart/items', { method: 'POST', body: JSON.stringify(body) });
     applyCart(cartResponse);
     showToast(`${product.name} added to cart`);
@@ -702,7 +711,7 @@ function renderCartDrawer() {
         <span class="font-space text-[0.65rem] tracking-[0.2em] uppercase text-muted">Total</span>
         <span class="font-bebas text-3xl text-lavender">$${total.toFixed(2)}</span>
       </div>
-      <button class="w-full py-4 border border-secondary bg-secondary/10 text-line-bright font-semibold text-[0.72rem] tracking-[0.2em] uppercase
+      <button id="cart-checkout-btn" class="w-full py-4 border border-secondary bg-secondary/10 text-line-bright font-semibold text-[0.72rem] tracking-[0.2em] uppercase
                      hover:bg-secondary/20 hover:shadow-[0_0_30px_rgba(155,89,247,.3)] active:scale-[.99] transition-all">
         Proceed to Checkout →
       </button>
@@ -714,6 +723,10 @@ function renderCartDrawer() {
   });
   content.querySelectorAll('.cart-remove-btn').forEach(btn => {
     btn.addEventListener('click', () => removeFromCart(Number(btn.dataset.id)));
+  });
+
+  document.getElementById('cart-checkout-btn')?.addEventListener('click', () => {
+    window.location.href = '/payment';
   });
 }
 

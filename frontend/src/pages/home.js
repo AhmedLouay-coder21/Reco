@@ -19,14 +19,14 @@ export function HomeView() {
         — Frequency 001 · Drop Season IV —
       </p>
       <h1 class="hero-title font-bebas text-[clamp(4rem,14vw,12rem)] mb-4 hero-anim-2">
-        <span class="glow-word">THE</span><br>FIELD
+        <span class="glow-word">RECO</span><br>
       </h1>
       <p class="text-[0.85rem] font-light tracking-[0.25em] uppercase text-muted mb-12 max-w-[500px] leading-relaxed hero-anim-3">
         Objects channeled from the space between thought and form.<br>For those who feel the frequency.
       </p>
       <div class="flex gap-5 hero-anim-4">
         <a href="#products" class="relative overflow-hidden px-10 py-4 border border-secondary bg-secondary/10 text-line-bright text-[0.72rem] font-semibold tracking-[0.2em] uppercase rounded-sm transition-all hover:shadow-[0_0_30px_rgba(155,89,247,0.3)] hover:text-white">
-          Enter the Field →
+          Enter RECO →
         </a>
         <a href="#about" class="px-9 py-4 border border-secondary/20 text-[0.72rem] font-semibold tracking-[0.2em] uppercase rounded-sm transition-all hover:text-lavender hover:border-secondary/40 text-muted">
           Our Ritual
@@ -55,7 +55,7 @@ export function HomeView() {
             <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-secondary"></span> Current Transmission
           </div>
           <h2 class="font-bebas text-5xl lg:text-7xl tracking-wider leading-none">
-            OBJECTS <span class="text-line-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">FROM</span><br>THE FIELD
+            OBJECTS <span class="text-line-bright drop-shadow-[0_0_30px_rgba(155,89,247,0.4)]">FROM</span><br>RECO
           </h2>
         </div>
         <div id="categories" class="flex gap-2">

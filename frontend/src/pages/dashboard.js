@@ -63,7 +63,7 @@ function AdminShell() {
   <div id="dash-root" class="min-h-screen flex bg-main text-(--color-white) font-josefin">
     <aside class="w-[220px] min-h-screen flex-shrink-0 bg-surface border-r border-border flex flex-col sticky top-0 h-screen overflow-y-auto max-md:w-16">
       <div class="font-bebas text-[1.6rem] tracking-[0.15em] text-line-bright drop-shadow-[0_0_20px_var(--color-glow)] px-5 pt-7 pb-5 border-b border-border">
-        THE FIELD<span class="block text-[0.65rem] tracking-[0.25em] text-muted mt-0.5 max-md:hidden">Admin Control</span>
+        RECO<span class="block text-[0.65rem] tracking-[0.25em] text-muted mt-0.5 max-md:hidden">Admin Control</span>
       </div>
       <nav class="flex-1 py-4">
         <div class="${navSectionClass}">Overview</div>
@@ -115,7 +115,7 @@ function CustomerShell() {
   <div id="dash-root" class="min-h-screen flex bg-main text-(--color-white) font-josefin">
     <aside class="w-[220px] min-h-screen flex-shrink-0 bg-surface border-r border-border flex flex-col sticky top-0 h-screen overflow-y-auto max-md:w-16">
       <div class="font-bebas text-[1.6rem] tracking-[0.15em] text-line-bright drop-shadow-[0_0_20px_var(--color-glow)] px-5 pt-7 pb-5 border-b border-border">
-        THE FIELD<span class="block text-[0.65rem] tracking-[0.25em] text-muted mt-0.5 max-md:hidden">My Channel</span>
+        RECO<span class="block text-[0.65rem] tracking-[0.25em] text-muted mt-0.5 max-md:hidden">My Channel</span>
       </div>
       <nav class="flex-1 py-4">
         <div class="${navSectionClass}">Discover</div>
@@ -188,10 +188,28 @@ function statusPill(s) {
     Pending: 'text-yellow-300 border-yellow-300/80 bg-yellow-400/10',
     Completed: 'text-emerald-300 border-emerald-300/80 bg-emerald-400/10',
     Cancelled: 'text-red-300 border-red-300/80 bg-red-400/10',
+    PENDING: 'text-yellow-300 border-yellow-300/80 bg-yellow-400/10',
+    COMPLETED: 'text-emerald-300 border-emerald-300/80 bg-emerald-400/10',
+    CANCELLED: 'text-red-300 border-red-300/80 bg-red-400/10',
     ADMIN: 'text-line-bright border-secondary/70 bg-secondary/10',
     CUSTOMER: 'text-muted border-border/70 bg-surface',
   };
   return `<span class="${base} ${map[s] || 'text-muted border-border/70 bg-surface'}">${s}</span>`;
+}
+
+function fmtMoney(v) {
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n.toFixed(2) : (v ?? '—');
+}
+
+function fmtDate(v) {
+  if (!v) return '—';
+  const d = new Date(v);
+  return Number.isNaN(d.valueOf()) ? '—' : d.toLocaleDateString();
+}
+
+function statusKey(v) {
+  return (v == null) ? '' : String(v).toUpperCase();
 }
 
 function stars(avg) {
@@ -509,7 +527,7 @@ async function loadBrowse() {
     const catOptions = catsData.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     el.innerHTML = `
       <div class="flex items-center justify-between mb-4">
-        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Objects from the Field</div>
+        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Objects from RECO</div>
         <div class="flex gap-2 items-center">
           <input class="${inputClass} w-[160px]" id="search-q" placeholder="Search...">
           <select class="${selectClass} w-[120px]" id="cat-filter"><option value="">All Categories</option>${catOptions}</select>
@@ -552,10 +570,11 @@ function renderProductGrid(products, container) {
     btn.addEventListener('click', async () => {
       if (!isAuthenticated() || !isTokenValid()) { showAlert('Please log in with a real account to add to cart', 'error'); return; }
       try {
-        await api(`/users/${uid}/cart/items`, { method:'POST', body: JSON.stringify({ product_id: parseInt(btn.dataset.addCart), quantity: 1 }) });
+        const productId = Number(btn.dataset.addCart);
+        await api('/cart/items', { method:'POST', body: JSON.stringify({ productId, quantity: 1 }) });
         showAlert('Added to cart');
         // track interaction
-        api(`/users/${uid}/interactions`, { method:'POST', body: JSON.stringify({ product_id: parseInt(btn.dataset.addCart), interaction_type: 'cart_add' }) }).catch(()=>{});
+        api(`/users/${uid}/interactions`, { method:'POST', body: JSON.stringify({ productId, interactionType: 'CART_ADD' }) }).catch(()=>{});
       } catch(e) { showAlert(e.message, 'error'); }
     });
   });
@@ -645,7 +664,7 @@ async function openProductDetailModal(productId) {
     document.getElementById('modal-add-cart').addEventListener('click', async () => {
       if (!isAuthenticated() || !isTokenValid()) { showAlert('Please log in to add to cart', 'error'); return; }
       try {
-        await api(`/users/${uid}/cart/items`, { method:'POST', body: JSON.stringify({ product_id: prod.id, quantity: 1 }) });
+        await api('/cart/items', { method:'POST', body: JSON.stringify({ productId: prod.id, quantity: 1 }) });
         showAlert('Added to cart');
       } catch(e) { showAlert(e.message, 'error'); }
     });
@@ -667,9 +686,11 @@ async function openProductDetailModal(productId) {
 async function loadRecs() {
   const el = document.getElementById('panel-recs');
   el.innerHTML = loadingMarkup('Tuning your frequency');
+  const user = await api(`/users/me`);
+  const uid = user.id;
   try {
     const [personal, popular] = await Promise.allSettled([
-      uid ? api(`/users/${uid}/recommendations`) : Promise.reject(),
+      uid ? api(`/user/${uid}/recommendations`) : Promise.reject(),
       api('/recommendations/popular'),
     ]);
 
@@ -677,16 +698,16 @@ async function loadRecs() {
     if (personal.status === 'fulfilled') {
       const d = personal.value;
       html += `
-        <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">For You (${d.total_count})</div></div>
+        <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">For You (${d.recommendations.length})</div></div>
         <div class="flex flex-col gap-2.5 mb-7">
           ${d.recommendations.map(r => `
             <div class="flex items-center gap-3 border border-border bg-surface2 p-3 transition-colors hover:border-secondary/40">
-              <div class="font-bebas text-[1.6rem] text-secondary w-[52px] text-center leading-none">${(r.recommendation_score*100).toFixed(0)}%</div>
+              <div class="font-bebas text-[1.6rem] text-secondary w-[52px] text-center leading-none">${(r.recommendationScore*100).toFixed(0)}%</div>
               <div class="flex-1">
                 <div class="text-[0.82rem] mb-1">${r.name}</div>
                 <div class="text-line-bright text-[0.8rem]">$${r.price} · <span class="text-secondary text-[0.7rem]">${stars(r.avg_rating)}</span></div>
               </div>
-              <button class="${btnBaseClass} ${btnSmClass}" data-add-cart="${r.product_id}">+ Cart</button>
+              <button class="${btnBaseClass} ${btnSmClass}" data-add-cart="${r.productId}">+ Cart</button>
             </div>`).join('')}
         </div>`;
     }
@@ -700,9 +721,9 @@ async function loadRecs() {
               <div class="font-bebas text-[1.6rem] text-secondary w-[52px] text-center leading-none">#${r.rank}</div>
               <div class="flex-1">
                 <div class="text-[0.82rem] mb-1">${r.name}</div>
-                <div class="text-line-bright text-[0.8rem]">$${r.price} · Pop: ${r.popularity_score?.toFixed(1)}</div>
+                <div class="text-line-bright text-[0.8rem]">$${r.price} · Pop: ${r.popularityScore * 100?.toFixed(1)}%</div>
               </div>
-              <button class="${btnBaseClass} ${btnSmClass}" data-add-cart="${r.product_id}">+ Cart</button>
+              <button class="${btnBaseClass} ${btnSmClass}" data-add-cart="${r.productId}">+ Cart</button>
             </div>`).join('')}
         </div>`;
     }
@@ -713,7 +734,15 @@ async function loadRecs() {
       btn.addEventListener('click', async () => {
         if (!uid) { showAlert('Login required', 'error'); return; }
         try {
-          await api(`/users/${uid}/cart/items`, { method:'POST', body: JSON.stringify({ product_id: parseInt(btn.dataset.addCart), quantity: 1 }) });
+          const productId = Number(btn.dataset.addCart);
+          await api(`/users/${uid}/interactions`, {
+            method: 'POST',
+            body: JSON.stringify({ productId, interactionType: 'CART_ADD' }),
+          }).catch(() => {});
+          await api('/cart/items', {
+            method: 'POST',
+            body: JSON.stringify({ productId, quantity: 1 }),
+          });
           showAlert('Added to cart');
         } catch(e) { showAlert(e.message, 'error'); }
       });
@@ -729,28 +758,28 @@ async function loadCart() {
   try {
     const data = await api(`/cart`);
     const items = data.items || [];
-    if (!items.length) { el.innerHTML = emptyMarkup('Your cart is empty — browse the Field'); return; }
+    if (!items.length) { el.innerHTML = emptyMarkup('Your cart is empty — browse RECO'); return; }
 
     el.innerHTML = `
       <div class="flex items-center justify-between mb-4">
-        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Cart (${data.item_count} items)</div>
+        <div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">Cart (${data.totalQuantity} items)</div>
         <button class="${btnBaseClass} ${btnMdClass} ${btnDangerClass}" id="clear-cart">Clear Cart</button>
       </div>
       <div id="cart-items">
         ${items.map(item => `
-          <div class="flex items-center justify-between gap-3 py-3 border-b border-border" data-cart-item="${item.cart_item_id || item.product_id}">
-            <div class="text-[0.82rem] flex-1">${item.name}</div>
+          <div class="flex items-center justify-between gap-3 py-3 border-b border-border" data-cart-item="${item.productId}">
+            <div class="text-[0.82rem] flex-1">${item.productName}</div>
             <div class="flex items-center gap-2">
-              <button class="w-7 h-7 bg-surface border border-border text-(--color-white) text-sm flex items-center justify-center transition-all hover:border-secondary hover:text-line-bright" data-qty-down="${item.cart_item_id}" data-current="${item.quantity}" data-cart="${data.id}">−</button>
+              <button class="w-7 h-7 bg-surface border border-border text-(--color-white) text-sm flex items-center justify-center transition-all hover:border-secondary hover:text-line-bright" data-qty-down="${item.productId}" data-current="${item.quantity}">−</button>
               <span class="text-[0.8rem] min-w-[24px] text-center">${item.quantity}</span>
-              <button class="w-7 h-7 bg-surface border border-border text-(--color-white) text-sm flex items-center justify-center transition-all hover:border-secondary hover:text-line-bright" data-qty-up="${item.cart_item_id}" data-current="${item.quantity}" data-cart="${data.id}">+</button>
+              <button class="w-7 h-7 bg-surface border border-border text-(--color-white) text-sm flex items-center justify-center transition-all hover:border-secondary hover:text-line-bright" data-qty-up="${item.productId}" data-current="${item.quantity}">+</button>
             </div>
-            <div class="text-[0.82rem] text-line-bright min-w-[60px] text-right">$${(item.price * item.quantity).toFixed(2)}</div>
-            <button class="${btnBaseClass} ${btnSmClass} ${btnDangerClass}" data-remove-item="${item.cart_item_id}" data-cart="${data.id}">✕</button>
+            <div class="text-[0.82rem] text-line-bright min-w-[60px] text-right">$${fmtMoney(item.lineTotal)}</div>
+            <button class="${btnBaseClass} ${btnSmClass} ${btnDangerClass}" data-remove-item="${item.productId}">✕</button>
           </div>`).join('')}
       </div>
       <div class="border border-border bg-surface2 p-5 mt-5">
-        <div class="flex justify-between font-bebas text-[1.1rem] tracking-[0.1em] text-line-bright"><span>Total</span><span>$${data.total_price}</span></div>
+        <div class="flex justify-between font-bebas text-[1.1rem] tracking-[0.1em] text-line-bright"><span>Total</span><span>$${fmtMoney(data.subtotal)}</span></div>
         <div class="mt-3.5 flex gap-2.5 justify-end">
           <button class="${btnBaseClass} ${btnMdClass} ${btnSuccessClass}" id="checkout-btn">Checkout →</button>
         </div>
@@ -758,13 +787,13 @@ async function loadCart() {
 
     document.getElementById('clear-cart').addEventListener('click', async () => {
       if (!confirm('Clear entire cart?')) return;
-      try { await api(`/users/${uid}/cart`, { method:'DELETE' }); showAlert('Cart cleared'); loadCart(); }
+      try { await api(`/cart/clear`, { method:'DELETE' }); showAlert('Cart cleared'); loadCart(); }
       catch(e) { showAlert(e.message, 'error'); }
     });
 
     el.querySelectorAll('[data-remove-item]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        try { await api(`/carts/${btn.dataset.cart}/items/${btn.dataset.removeItem}`, { method:'DELETE' }); loadCart(); }
+        try { await api(`/cart/items/${btn.dataset.removeItem}`, { method:'DELETE' }); loadCart(); }
         catch(e) { showAlert(e.message, 'error'); }
       });
     });
@@ -775,12 +804,12 @@ async function loadCart() {
         const itemId = btn.dataset.qtyUp || btn.dataset.qtyDown;
         const current = parseInt(btn.dataset.current);
         const newQty = isUp ? current + 1 : Math.max(1, current - 1);
-        try { await api(`/carts/${btn.dataset.cart}/items/${itemId}`, { method:'PUT', body: JSON.stringify({ quantity: newQty }) }); loadCart(); }
+        try { await api(`/cart/items/${itemId}`, { method:'PUT', body: JSON.stringify({ quantity: newQty }) }); loadCart(); }
         catch(e) { showAlert(e.message, 'error'); }
       });
     });
 
-    document.getElementById('checkout-btn').addEventListener('click', () => openCheckout(uid, data.total_price));
+    document.getElementById('checkout-btn').addEventListener('click', () => openCheckout(uid, data.subtotal));
   } catch(e) { el.innerHTML = emptyMarkup(e.message); }
 }
 
@@ -806,8 +835,12 @@ function openCheckout(uid, total) {
 
   document.getElementById('place-order-btn').addEventListener('click', async () => {
     try {
-      const order = await api(`/users/${uid}/orders`, { method:'POST', body: JSON.stringify({}) });
-      const payment = await api(`/orders/${order.id}/payment`, { method:'POST', body: JSON.stringify({ amount: total, payment_method: document.getElementById('pay-method').value }) });
+      const order = await api(`/orders`, { method:'POST' });
+      const amount = typeof total === 'number' ? total : Number(total);
+      const payment = await api(`/orders/${order.id}/payment`, {
+        method:'POST',
+        body: JSON.stringify({ amount, paymentMethod: document.getElementById('pay-method').value }),
+      });
       closeModal();
       showAlert(`Order #${order.id} placed! Payment: ${payment.status}`);
       loadCart();
@@ -821,20 +854,21 @@ async function loadCustomerOrders() {
   el.innerHTML = loadingMarkup('Loading orders');
   if (!isAuthenticated() || !isTokenValid()) { el.innerHTML = emptyMarkup('Log in to view orders'); return; }
   try {
-    const data = await api(`/users/${uid}/orders`);
-    if (!data.orders.length) { el.innerHTML = emptyMarkup('No orders yet'); return; }
+    const data = await api(`/orders`);
+    const orders = Array.isArray(data) ? data : (data?.orders || []);
+    if (!orders.length) { el.innerHTML = emptyMarkup('No orders yet'); return; }
     el.innerHTML = `
-      <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">My Orders (${data.total})</div></div>
+      <div class="flex items-center justify-between mb-4"><div class="font-bebas text-[1.1rem] tracking-[0.2em] text-line-bright">My Orders (${orders.length})</div></div>
       <div class="${tableWrapClass}">
         <table class="${tableClass}">
           <thead><tr><th class="${thClass}">Order ID</th><th class="${thClass}">Total</th><th class="${thClass}">Status</th><th class="${thClass}">Date</th><th class="${thClass}">Details</th></tr></thead>
           <tbody>
-            ${data.orders.map(o => `
+            ${orders.map(o => `
               <tr>
                 <td class="${tdClass}">#${o.id}</td>
-                <td class="${tdClass}">$${o.total_amount}</td>
+                <td class="${tdClass}">$${fmtMoney(o.totalAmount ?? o.total_amount)}</td>
                 <td class="${tdClass}">${statusPill(o.status)}</td>
-                <td class="${tdClass}">${new Date(o.created_at).toLocaleDateString()}</td>
+                <td class="${tdClass}">${fmtDate(o.createdAt ?? o.created_at)}</td>
                 <td class="${tdClass}"><button class="${btnBaseClass} ${btnSmClass}" data-view-order="${o.id}">View</button></td>
               </tr>`).join('')}
           </tbody>
@@ -849,12 +883,12 @@ async function loadCustomerOrders() {
             <div class="relative w-[min(520px,95vw)] max-h-[90vh] overflow-y-auto border border-border bg-surface2 p-7">
               <button class="absolute top-3.5 right-3.5 text-muted text-xl hover:text-line-bright" onclick="document.getElementById('modal-bg').remove()">✕</button>
               <div class="font-bebas text-[1.3rem] tracking-[0.2em] text-line-bright mb-5">Order #${order.id}</div>
-              <div class="mb-4">${statusPill(order.status)} · $${order.total_amount} · ${new Date(order.created_at).toLocaleDateString()}</div>
+              <div class="mb-4">${statusPill(order.status)} · $${fmtMoney(order.totalAmount ?? order.total_amount)} · ${fmtDate(order.createdAt ?? order.created_at)}</div>
               <div class="${tableWrapClass}">
                 <table class="${tableClass}">
                   <thead><tr><th class="${thClass}">Product</th><th class="${thClass}">Qty</th><th class="${thClass}">Price</th></tr></thead>
                   <tbody>
-                    ${(order.items||[]).map(i => `<tr><td class="${tdClass}">${i.name || '#'+i.product_id}</td><td class="${tdClass}">${i.quantity}</td><td class="${tdClass}">$${i.price_at_purchase}</td></tr>`).join('')}
+                    ${(order.items||[]).map(i => `<tr><td class="${tdClass}">${i.productName || i.name || '#'+(i.productId ?? i.product_id)}</td><td class="${tdClass}">${i.quantity}</td><td class="${tdClass}">$${fmtMoney(i.priceAtPurchase ?? i.price_at_purchase)}</td></tr>`).join('')}
                   </tbody>
                 </table>
               </div>
@@ -1039,9 +1073,9 @@ async function loadAdminOrders() {
     </div>
 
     <div class="border border-border bg-surface2 p-5 mb-5">
-      <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">Search Orders by User</div>
+      <div class="font-bebas text-[0.9rem] tracking-[0.22em] text-line-bright mb-4">Search Order by ID</div>
       <div class="flex gap-2.5">
-        <input class="${inputClass} max-w-[160px]" id="order-uid" placeholder="User ID">
+        <input class="${inputClass} max-w-[160px]" id="order-uid" placeholder="Order ID">
         <button class="${btnBaseClass} ${btnMdClass}" id="order-search-btn">Search</button>
       </div>
     </div>
@@ -1054,15 +1088,16 @@ async function loadAdminOrders() {
     const res = document.getElementById('orders-result');
     res.innerHTML = loadingMarkup('Loading');
     try {
-      const orders = await api(`/orders/${uid}`);
+      const order = await api(`/orders/${uid}`);
+      const orders = order ? [order] : [];
       if (!orders.length) { res.innerHTML = emptyMarkup('No orders found'); return; }
 
       // update stat cards from real data
       const total = orders.length;
-      const completed = orders.filter(o => o.status === 'Completed').length;
-      const pending   = orders.filter(o => o.status === 'Pending').length;
-      const cancelled = orders.filter(o => o.status === 'Cancelled').length;
-      const revenue   = orders.reduce((s, o) => s + parseFloat(o.total_amount || 0), 0);
+      const completed = orders.filter(o => statusKey(o.status) === 'COMPLETED').length;
+      const pending   = orders.filter(o => statusKey(o.status) === 'PENDING').length;
+      const cancelled = orders.filter(o => statusKey(o.status) === 'CANCELLED').length;
+      const revenue   = orders.reduce((s, o) => s + (Number(o.totalAmount ?? o.total_amount) || 0), 0);
 
       document.getElementById('od-total').textContent = total;
       document.getElementById('od-completed').textContent = completed;
@@ -1089,9 +1124,9 @@ async function loadAdminOrders() {
 
       // revenue by status bar chart
       const revByStatus = [
-        { label: 'Completed', val: orders.filter(o=>o.status==='Completed').reduce((s,o)=>s+parseFloat(o.total_amount||0),0), color: 'bg-secondary', text: 'text-line-bright' },
-        { label: 'Pending',   val: orders.filter(o=>o.status==='Pending').reduce((s,o)=>s+parseFloat(o.total_amount||0),0),   color: 'bg-yellow-400',  text: 'text-yellow-300' },
-        { label: 'Cancelled', val: orders.filter(o=>o.status==='Cancelled').reduce((s,o)=>s+parseFloat(o.total_amount||0),0), color: 'bg-red-400',     text: 'text-red-300' },
+        { label: 'Completed', val: orders.filter(o=>statusKey(o.status)==='COMPLETED').reduce((s,o)=>s+(Number(o.totalAmount ?? o.total_amount)||0),0), color: 'bg-secondary', text: 'text-line-bright' },
+        { label: 'Pending',   val: orders.filter(o=>statusKey(o.status)==='PENDING').reduce((s,o)=>s+(Number(o.totalAmount ?? o.total_amount)||0),0),   color: 'bg-yellow-400',  text: 'text-yellow-300' },
+        { label: 'Cancelled', val: orders.filter(o=>statusKey(o.status)==='CANCELLED').reduce((s,o)=>s+(Number(o.totalAmount ?? o.total_amount)||0),0), color: 'bg-red-400',     text: 'text-red-300' },
       ];
       const maxRev = Math.max(...revByStatus.map(r => r.val), 1);
       document.getElementById('od-rev-chart').innerHTML = revByStatus.map(r => `
@@ -1122,15 +1157,15 @@ async function loadAdminOrders() {
               ${orders.map(o => `
                 <tr>
                   <td class="${tdClass} font-bebas text-[0.9rem] tracking-[0.1em] text-line-bright">#${o.id}</td>
-                  <td class="${tdClass} text-emerald-300">$${o.total_amount}</td>
+                  <td class="${tdClass} text-emerald-300">$${fmtMoney(o.totalAmount ?? o.total_amount)}</td>
                   <td class="${tdClass}">${statusPill(o.status)}</td>
-                  <td class="${tdClass} text-muted">${new Date(o.created_at).toLocaleDateString()}</td>
+                  <td class="${tdClass} text-muted">${fmtDate(o.createdAt ?? o.created_at)}</td>
                   <td class="${tdClass}">
                     <div class="flex items-center gap-2">
                       <select class="${selectSmClass} w-auto" data-order-id="${o.id}">
-                        <option ${o.status==='Pending'   ? 'selected' : ''}>Pending</option>
-                        <option ${o.status==='Completed' ? 'selected' : ''}>Completed</option>
-                        <option ${o.status==='Cancelled' ? 'selected' : ''}>Cancelled</option>
+                        <option value="PENDING" ${statusKey(o.status)==='PENDING' ? 'selected' : ''}>Pending</option>
+                        <option value="COMPLETED" ${statusKey(o.status)==='COMPLETED' ? 'selected' : ''}>Completed</option>
+                        <option value="CANCELLED" ${statusKey(o.status)==='CANCELLED' ? 'selected' : ''}>Cancelled</option>
                       </select>
                       <button class="${btnBaseClass} ${btnSmClass}" data-update-order="${o.id}">Set</button>
                     </div>
